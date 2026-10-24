@@ -154,8 +154,8 @@ caveats with the numbers.
 MIT, © 2026 Active Crossing LLC. The corpus this code generates is synthetic and
 carries no patient privacy restrictions.
 
-**No patent is claimed on anything described here, and none will be sought.** This
-repository is published deliberately as prior art: the method it describes —
+**No patent is or will be sought on the method described in this repository.** It
+is published deliberately as prior art: the method it describes —
 parsing interoperability messages into native structure, resolving what
 path-based rules can resolve, and deferring only the remainder to a detector
 together with its structural context — is free for anyone to implement, and this
