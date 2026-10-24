@@ -1,0 +1,29 @@
+cff-version: 1.2.0
+title: "deidbench: a reproducible PHI-detection benchmark for HL7 v2"
+message: "If you use this benchmark, please cite it and quote the caveats alongside the numbers."
+type: software
+authors:
+  - given-names: Ryan
+    family-names: Dick
+    email: ryan@activecrossing.com
+    orcid: "https://orcid.org/0009-0007-3992-3303"
+    affiliation: "Active Crossing LLC"
+repository-code: "https://github.com/ryanadick/deidentified-ai-benchmark"
+license: MIT
+version: 0.1.0
+abstract: >-
+  A reproducible benchmark for protected health information (PHI) detection in
+  HL7 v2 messages. Existing de-identification tools and evaluations target
+  free-text clinical notes, but clinical data moves as interoperability
+  messages, where PHI sits in structured fields, non-standard segments,
+  misused standard fields, and narrative text embedded in the message. This
+  package generates synthetic HL7 v2 messages with planted, annotated PHI
+  labelled by location class, and scores detectors with a per-location
+  breakdown. All data is synthetic; no production data or PHI is involved.
+keywords:
+  - HL7
+  - health information exchange
+  - de-identification
+  - protected health information
+  - benchmark
+  - health informatics

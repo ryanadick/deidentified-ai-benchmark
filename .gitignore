@@ -1,0 +1,22 @@
+# This repository must never hold a vault key or database. It does not ship the
+# vault at all, but the pattern stays so a stray file from the engine working
+# tree cannot be committed here by accident.
+*.key
+*.db
+*.db-wal
+*.db-shm
+
+# Generated corpora and reports. The committed results/ artifacts are the
+# reference run; everything else is reproducible from a seed and not tracked.
+out/
+corpus.jsonl
+*.jsonl.gz
+
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.egg-info/
+dist/
+build/
+.DS_Store

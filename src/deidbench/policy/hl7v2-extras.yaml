@@ -1,0 +1,298 @@
+# Beyond PID: the dates that make interval preservation visible, the next-of-kin
+# segment, and the narrative fields rules cannot resolve.
+#
+# The narrative entries matter most. OBX-5, NTE-3 and non-standard Z-segments
+# routinely carry names, phone numbers and addresses in prose, and no path-based
+# rule can find them. Marking them `defer_to_model` rather than omitting them is
+# what makes the gap countable: the engine reports how many deferred locations it
+# saw and how much text they held, which is the preliminary measurement behind
+# the claim that rules alone are not sufficient.
+
+name: hl7v2-extras
+version: 1
+
+rules:
+  # -- message and event dates -----------------------------------------
+
+  - path: MSH-7
+    phi_type: event_date
+    action: shift_event_date
+    data_type: TS
+    note: Message date/time.
+
+  - path: EVN-2
+    phi_type: event_date
+    action: shift_event_date
+    data_type: TS
+    note: Recorded date/time of the trigger event.
+
+  - path: EVN-3
+    phi_type: event_date
+    action: shift_event_date
+    data_type: TS
+    note: Date/time planned event.
+
+  - path: EVN-5.2
+    phi_type: clinician_name
+    action: surrogate
+    data_type: XCN
+    note: Operator family name.
+
+  - path: EVN-5.3
+    phi_type: clinician_name
+    action: surrogate
+    data_type: XCN
+    note: Operator given name.
+
+  - path: EVN-6
+    phi_type: event_date
+    action: shift_event_date
+    data_type: TS
+    note: Event occurred.
+
+  # -- next of kin ------------------------------------------------------
+  #
+  # NK1 is where a de-identifier that only handles PID leaks. The spouse's
+  # name, the daughter's mobile number and the shared home address are all
+  # PHI, and they identify the patient by association.
+
+  - path: NK1-2.1
+    phi_type: family_name
+    action: surrogate
+    data_type: XPN
+
+  - path: NK1-2.2
+    phi_type: given_name
+    action: surrogate
+    data_type: XPN
+    sex_from: NK1-15
+    sex_from_relationship: NK1-3
+    note: >
+      Contact given name. NK1-15 carries this contact's own sex and NK1-3 the
+      relationship, read from this NK1 occurrence -- so the second contact
+      takes the second contact's sex rather than the patient's.
+
+  - path: NK1-2.3
+    phi_type: middle_name
+    action: surrogate
+    data_type: XPN
+    sex_from: NK1-15
+    sex_from_relationship: NK1-3
+
+  - path: NK1-3
+    phi_type: identifier
+    action: retain
+    data_type: CE
+    note: >
+      Relationship (SPO, CHD, MTH). Categorical, clinically useful, an edge of
+      the family graph, and the fallback source for this contact's sex.
+
+  - path: NK1-4.1
+    phi_type: street_address
+    action: surrogate
+    data_type: XAD
+
+  - path: NK1-4.2
+    phi_type: address_other
+    action: surrogate
+    data_type: XAD
+
+  - path: NK1-4.3
+    phi_type: city
+    action: surrogate
+    data_type: XAD
+
+  - path: NK1-4.4
+    phi_type: state
+    action: surrogate
+    data_type: XAD
+
+  - path: NK1-4.5
+    phi_type: postal_code
+    action: surrogate
+    data_type: XAD
+
+  - path: NK1-5.1
+    phi_type: phone
+    action: surrogate
+    data_type: XTN
+
+  - path: NK1-5.4
+    phi_type: email
+    action: surrogate
+    data_type: XTN
+
+  - path: NK1-6.1
+    phi_type: phone
+    action: surrogate
+    data_type: XTN
+    note: Business phone number.
+
+  - path: NK1-15
+    phi_type: identifier
+    action: retain
+    data_type: IS
+    note: >
+      Contact's administrative sex. Categorical, and the source NK1-2's name
+      surrogate agrees with. It was missing from this policy entirely, so the
+      field passed through unexamined.
+
+  - path: NK1-16
+    phi_type: birth_date
+    action: shift_birth_date
+    data_type: TS
+    note: >
+      Next of kin's own date of birth. Shifted with the patient's birth offset,
+      which is a simplification: the contact is a different person and should
+      strictly have an offset of their own. Resolving contacts as first-class
+      identities is Phase I work.
+
+  # -- visit ------------------------------------------------------------
+
+  - path: PV1-3.1
+    phi_type: identifier
+    action: retain
+    data_type: PL
+    note: >
+      Assigned patient location, point of care. Retained: a unit code supports
+      analytics and does not identify a patient on its own. A site that treats
+      room and bed as identifying should override PV1-3.2 and PV1-3.3.
+
+  - path: PV1-7.2
+    phi_type: clinician_name
+    action: surrogate
+    data_type: XCN
+    note: Attending doctor, family name.
+
+  - path: PV1-7.3
+    phi_type: clinician_name
+    action: surrogate
+    data_type: XCN
+    note: Attending doctor, given name.
+
+  - path: PV1-8.2
+    phi_type: clinician_name
+    action: surrogate
+    data_type: XCN
+    note: Referring doctor, family name.
+
+  - path: PV1-8.3
+    phi_type: clinician_name
+    action: surrogate
+    data_type: XCN
+
+  # Consulting and admitting doctors are the same kind of value as the
+  # attending doctor, and leaving them out was a coverage gap rather than a
+  # decision. PV1-17 is usually the same person as PV1-7, which made the
+  # omission worse than an ordinary miss: the original name sat in the output
+  # beside its own surrogate, which is enough to invert the mapping.
+  - path: PV1-9.2
+    phi_type: clinician_name
+    action: surrogate
+    data_type: XCN
+    note: Consulting doctor, family name. Repeats.
+
+  - path: PV1-9.3
+    phi_type: clinician_name
+    action: surrogate
+    data_type: XCN
+    note: Consulting doctor, given name.
+
+  - path: PV1-17.2
+    phi_type: clinician_name
+    action: surrogate
+    data_type: XCN
+    note: Admitting doctor, family name.
+
+  - path: PV1-17.3
+    phi_type: clinician_name
+    action: surrogate
+    data_type: XCN
+    note: Admitting doctor, given name.
+
+  - path: PV1-19.1
+    phi_type: account_number
+    action: surrogate
+    data_type: CX
+    note: Visit number.
+
+  - path: PV1-44
+    phi_type: event_date
+    action: shift_event_date
+    data_type: TS
+    note: Admit date/time.
+
+  - path: PV1-45
+    phi_type: event_date
+    action: shift_event_date
+    data_type: TS
+    note: >
+      Discharge date/time. Shifted by the same offset as the admit date, so
+      length of stay is preserved to the second.
+
+  # -- narrative: the measured gap --------------------------------------
+
+  - path: OBX-5
+    phi_type: free_text
+    action: defer_to_model
+    data_type: varies
+    note: >
+      Observation value. For TX and FT value types this is prose containing
+      whatever the clinician typed. No path-based rule can de-identify it.
+
+  - path: NTE-3
+    phi_type: free_text
+    action: defer_to_model
+    data_type: FT
+    note: Comment text. Unstructured by definition.
+
+  - path: DG1-4
+    phi_type: free_text
+    action: defer_to_model
+    data_type: ST
+    note: Diagnosis description, free text in many feeds.
+
+  - path: DG1-5
+    phi_type: event_date
+    action: shift_event_date
+    data_type: TS
+    note: >
+      Diagnosis date/time. Shifted by the same offset as admission and
+      discharge. An unshifted clinical date among shifted ones is worse than a
+      date left alone everywhere: it is a true date, and the gap between it and
+      the shifted admission reveals the offset.
+
+  - path: AL1-5
+    phi_type: free_text
+    action: defer_to_model
+    data_type: ST
+    note: Allergy reaction, free text.
+
+  # A real Z-segment from a production feed, included because non-standard
+  # segments are where a text-only de-identifier fails worst: there is no
+  # schema telling it that ZPD-2 is a name.
+  - path: ZPD-2
+    phi_type: name_freeform
+    action: surrogate
+    data_type: ST
+    note: >
+      Site-defined patient name, sent as one string. Shows why policies are
+      data: no standard describes this field, and a site can add it without
+      changing code.
+
+  - path: ZPD-3
+    phi_type: phone
+    action: surrogate
+    data_type: ST
+
+  - path: ZPD-4
+    phi_type: medical_record_number
+    action: surrogate
+    data_type: ST
+    patient_key: true
+    key_namespace: zpd
+
+  - path: ZPD-5
+    phi_type: organization
+    action: surrogate
+    data_type: ST

@@ -1,0 +1,1372 @@
+{
+  "corpus": {
+    "annotations": 25585,
+    "by_location_class": {
+      "misused": 171,
+      "narrative": 3653,
+      "nonstandard": 1616,
+      "structured": 20145
+    },
+    "by_phi_type": {
+      "account_number": 1134,
+      "address_other": 839,
+      "birth_date": 864,
+      "city": 1188,
+      "clinician_name": 2328,
+      "county": 500,
+      "email": 547,
+      "event_date": 2500,
+      "family_name": 1718,
+      "given_name": 1820,
+      "license_number": 569,
+      "medical_record_number": 1438,
+      "middle_name": 500,
+      "name_freeform": 485,
+      "name_suffix": 386,
+      "organization": 765,
+      "phone": 2818,
+      "postal_code": 1129,
+      "ssn": 1105,
+      "state": 1629,
+      "street_address": 1323
+    },
+    "messages": 500,
+    "metadata": {
+      "generator": "deid.corpus.generate",
+      "messages": 500,
+      "note": "Synthetic. No production data. Numbers from a planted-PHI corpus are a floor and a methodology demonstration, not a substitute for measurement on production messages.",
+      "policy": "hl7v2-pid-baseline+hl7v2-extras+hl7v2-financial",
+      "policy_version": 1,
+      "rates": {
+        "crlf": 0.2,
+        "loose_date": 0.15,
+        "misuse": 0.35,
+        "narrative": 0.7,
+        "nonstandard": 0.45,
+        "nonstandard_unknown": 0.3,
+        "odd_delimiter": 0.12
+      },
+      "reference_date": "2026-10-13",
+      "seed": 20261013
+    }
+  },
+  "detectors": [
+    {
+      "by_location_class": {
+        "misused": {
+          "covered": 102,
+          "f1": 0.7473,
+          "false_positives": 0,
+          "gold": 171,
+          "missed": 69,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 102,
+          "recall": 0.5965
+        },
+        "narrative": {
+          "covered": 0,
+          "f1": 0.0,
+          "false_positives": 0,
+          "gold": 3653,
+          "missed": 3653,
+          "partial": 0,
+          "precision": 0.0,
+          "predicted": 0,
+          "recall": 0.0
+        },
+        "nonstandard": {
+          "covered": 848,
+          "f1": 0.6883,
+          "false_positives": 0,
+          "gold": 1616,
+          "missed": 768,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 848,
+          "recall": 0.5248
+        },
+        "structured": {
+          "covered": 20145,
+          "f1": 1.0,
+          "false_positives": 0,
+          "gold": 20145,
+          "missed": 0,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 20145,
+          "recall": 1.0
+        }
+      },
+      "by_phi_type": {
+        "account_number": {
+          "covered": 1000,
+          "f1": 0.9372,
+          "false_positives": 0,
+          "gold": 1134,
+          "missed": 134,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 1000,
+          "recall": 0.8818
+        },
+        "address_other": {
+          "covered": 790,
+          "f1": 0.9699,
+          "false_positives": 0,
+          "gold": 839,
+          "missed": 49,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 790,
+          "recall": 0.9416
+        },
+        "birth_date": {
+          "covered": 500,
+          "f1": 0.7331,
+          "false_positives": 0,
+          "gold": 864,
+          "missed": 364,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 500,
+          "recall": 0.5787
+        },
+        "city": {
+          "covered": 1000,
+          "f1": 0.9141,
+          "false_positives": 0,
+          "gold": 1188,
+          "missed": 188,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 1000,
+          "recall": 0.8418
+        },
+        "clinician_name": {
+          "covered": 2000,
+          "f1": 0.9242,
+          "false_positives": 0,
+          "gold": 2328,
+          "missed": 328,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 2000,
+          "recall": 0.8591
+        },
+        "county": {
+          "covered": 500,
+          "f1": 1.0,
+          "false_positives": 0,
+          "gold": 500,
+          "missed": 0,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 500,
+          "recall": 1.0
+        },
+        "email": {
+          "covered": 500,
+          "f1": 0.9551,
+          "false_positives": 0,
+          "gold": 547,
+          "missed": 47,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 500,
+          "recall": 0.9141
+        },
+        "event_date": {
+          "covered": 2500,
+          "f1": 1.0,
+          "false_positives": 0,
+          "gold": 2500,
+          "missed": 0,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 2500,
+          "recall": 1.0
+        },
+        "family_name": {
+          "covered": 1000,
+          "f1": 0.7358,
+          "false_positives": 0,
+          "gold": 1718,
+          "missed": 718,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 1000,
+          "recall": 0.5821
+        },
+        "given_name": {
+          "covered": 1000,
+          "f1": 0.7092,
+          "false_positives": 0,
+          "gold": 1820,
+          "missed": 820,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 1000,
+          "recall": 0.5495
+        },
+        "license_number": {
+          "covered": 500,
+          "f1": 0.9355,
+          "false_positives": 0,
+          "gold": 569,
+          "missed": 69,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 500,
+          "recall": 0.8787
+        },
+        "medical_record_number": {
+          "covered": 1181,
+          "f1": 0.9019,
+          "false_positives": 0,
+          "gold": 1438,
+          "missed": 257,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 1181,
+          "recall": 0.8213
+        },
+        "middle_name": {
+          "covered": 500,
+          "f1": 1.0,
+          "false_positives": 0,
+          "gold": 500,
+          "missed": 0,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 500,
+          "recall": 1.0
+        },
+        "name_freeform": {
+          "covered": 212,
+          "f1": 0.6083,
+          "false_positives": 0,
+          "gold": 485,
+          "missed": 273,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 212,
+          "recall": 0.4371
+        },
+        "name_suffix": {
+          "covered": 386,
+          "f1": 1.0,
+          "false_positives": 0,
+          "gold": 386,
+          "missed": 0,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 386,
+          "recall": 1.0
+        },
+        "organization": {
+          "covered": 712,
+          "f1": 0.9641,
+          "false_positives": 0,
+          "gold": 765,
+          "missed": 53,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 712,
+          "recall": 0.9307
+        },
+        "phone": {
+          "covered": 2277,
+          "f1": 0.8938,
+          "false_positives": 0,
+          "gold": 2818,
+          "missed": 541,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 2277,
+          "recall": 0.808
+        },
+        "postal_code": {
+          "covered": 1000,
+          "f1": 0.9394,
+          "false_positives": 0,
+          "gold": 1129,
+          "missed": 129,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 1000,
+          "recall": 0.8857
+        },
+        "ssn": {
+          "covered": 1037,
+          "f1": 0.9683,
+          "false_positives": 0,
+          "gold": 1105,
+          "missed": 68,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 1037,
+          "recall": 0.9385
+        },
+        "state": {
+          "covered": 1500,
+          "f1": 0.9588,
+          "false_positives": 0,
+          "gold": 1629,
+          "missed": 129,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 1500,
+          "recall": 0.9208
+        },
+        "street_address": {
+          "covered": 1000,
+          "f1": 0.861,
+          "false_positives": 0,
+          "gold": 1323,
+          "missed": 323,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 1000,
+          "recall": 0.7559
+        }
+      },
+      "by_segment": {
+        "AL1": {
+          "covered": 0,
+          "f1": 0.0,
+          "false_positives": 0,
+          "gold": 248,
+          "missed": 248,
+          "partial": 0,
+          "precision": 0.0,
+          "predicted": 0,
+          "recall": 0.0
+        },
+        "DG1": {
+          "covered": 0,
+          "f1": 0.0,
+          "false_positives": 0,
+          "gold": 277,
+          "missed": 277,
+          "partial": 0,
+          "precision": 0.0,
+          "predicted": 0,
+          "recall": 0.0
+        },
+        "EVN": {
+          "covered": 2000,
+          "f1": 1.0,
+          "false_positives": 0,
+          "gold": 2000,
+          "missed": 0,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 2000,
+          "recall": 1.0
+        },
+        "MSH": {
+          "covered": 500,
+          "f1": 1.0,
+          "false_positives": 0,
+          "gold": 500,
+          "missed": 0,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 500,
+          "recall": 1.0
+        },
+        "NK1": {
+          "covered": 3895,
+          "f1": 1.0,
+          "false_positives": 0,
+          "gold": 3895,
+          "missed": 0,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 3895,
+          "recall": 1.0
+        },
+        "NTE": {
+          "covered": 0,
+          "f1": 0.0,
+          "false_positives": 0,
+          "gold": 1151,
+          "missed": 1151,
+          "partial": 0,
+          "precision": 0.0,
+          "predicted": 0,
+          "recall": 0.0
+        },
+        "OBX": {
+          "covered": 0,
+          "f1": 0.0,
+          "false_positives": 0,
+          "gold": 2016,
+          "missed": 2016,
+          "partial": 0,
+          "precision": 0.0,
+          "predicted": 0,
+          "recall": 0.0
+        },
+        "PID": {
+          "covered": 11352,
+          "f1": 1.0,
+          "false_positives": 0,
+          "gold": 11352,
+          "missed": 0,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 11352,
+          "recall": 1.0
+        },
+        "PV1": {
+          "covered": 2500,
+          "f1": 0.994,
+          "false_positives": 0,
+          "gold": 2530,
+          "missed": 30,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 2500,
+          "recall": 0.9881
+        },
+        "ZIN": {
+          "covered": 0,
+          "f1": 0.0,
+          "false_positives": 0,
+          "gold": 556,
+          "missed": 556,
+          "partial": 0,
+          "precision": 0.0,
+          "predicted": 0,
+          "recall": 0.0
+        },
+        "ZPD": {
+          "covered": 848,
+          "f1": 0.8889,
+          "false_positives": 0,
+          "gold": 1060,
+          "missed": 212,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 848,
+          "recall": 0.8
+        }
+      },
+      "detector": "rules-only",
+      "duration_ms": 629.6,
+      "messages": 500,
+      "misses_by_location_class": {
+        "misused": 69,
+        "narrative": 3653,
+        "nonstandard": 768
+      },
+      "spurious_by_phi_type": {},
+      "typed": {
+        "covered": 20493,
+        "f1": 0.878,
+        "false_positives": 602,
+        "gold": 25585,
+        "missed": 5092,
+        "partial": 0,
+        "precision": 0.9715,
+        "predicted": 21095,
+        "recall": 0.801
+      },
+      "untyped": {
+        "covered": 21095,
+        "f1": 0.9038,
+        "false_positives": 0,
+        "gold": 25585,
+        "missed": 4490,
+        "partial": 0,
+        "precision": 1.0,
+        "predicted": 21095,
+        "recall": 0.8245
+      }
+    },
+    {
+      "by_location_class": {
+        "misused": {
+          "covered": 171,
+          "f1": 1.0,
+          "false_positives": 0,
+          "gold": 171,
+          "missed": 0,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 171,
+          "recall": 1.0
+        },
+        "narrative": {
+          "covered": 2419,
+          "f1": 0.7968,
+          "false_positives": 0,
+          "gold": 3653,
+          "missed": 1234,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 1926,
+          "recall": 0.6622
+        },
+        "nonstandard": {
+          "covered": 1106,
+          "f1": 0.8126,
+          "false_positives": 0,
+          "gold": 1616,
+          "missed": 510,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 1106,
+          "recall": 0.6844
+        },
+        "structured": {
+          "covered": 7844,
+          "f1": 0.5605,
+          "false_positives": 0,
+          "gold": 20145,
+          "missed": 12301,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 7844,
+          "recall": 0.3894
+        }
+      },
+      "by_phi_type": {
+        "account_number": {
+          "covered": 1134,
+          "f1": 1.0,
+          "false_positives": 0,
+          "gold": 1134,
+          "missed": 0,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 1134,
+          "recall": 1.0
+        },
+        "address_other": {
+          "covered": 0,
+          "f1": 0.0,
+          "false_positives": 0,
+          "gold": 839,
+          "missed": 839,
+          "partial": 0,
+          "precision": 0.0,
+          "predicted": 0,
+          "recall": 0.0
+        },
+        "birth_date": {
+          "covered": 864,
+          "f1": 1.0,
+          "false_positives": 0,
+          "gold": 864,
+          "missed": 0,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 864,
+          "recall": 1.0
+        },
+        "city": {
+          "covered": 0,
+          "f1": 0.0,
+          "false_positives": 0,
+          "gold": 1188,
+          "missed": 1188,
+          "partial": 0,
+          "precision": 0.0,
+          "predicted": 0,
+          "recall": 0.0
+        },
+        "clinician_name": {
+          "covered": 212,
+          "f1": 0.1669,
+          "false_positives": 0,
+          "gold": 2328,
+          "missed": 2116,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 106,
+          "recall": 0.0911
+        },
+        "county": {
+          "covered": 0,
+          "f1": 0.0,
+          "false_positives": 0,
+          "gold": 500,
+          "missed": 500,
+          "partial": 0,
+          "precision": 0.0,
+          "predicted": 0,
+          "recall": 0.0
+        },
+        "email": {
+          "covered": 547,
+          "f1": 1.0,
+          "false_positives": 0,
+          "gold": 547,
+          "missed": 0,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 547,
+          "recall": 1.0
+        },
+        "event_date": {
+          "covered": 0,
+          "f1": 0.0,
+          "false_positives": 0,
+          "gold": 2500,
+          "missed": 2500,
+          "partial": 0,
+          "precision": 0.0,
+          "predicted": 0,
+          "recall": 0.0
+        },
+        "family_name": {
+          "covered": 429,
+          "f1": 0.3996,
+          "false_positives": 0,
+          "gold": 1718,
+          "missed": 1289,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 42,
+          "recall": 0.2497
+        },
+        "given_name": {
+          "covered": 457,
+          "f1": 0.4014,
+          "false_positives": 0,
+          "gold": 1820,
+          "missed": 1363,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 457,
+          "recall": 0.2511
+        },
+        "license_number": {
+          "covered": 569,
+          "f1": 1.0,
+          "false_positives": 0,
+          "gold": 569,
+          "missed": 0,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 569,
+          "recall": 1.0
+        },
+        "medical_record_number": {
+          "covered": 1200,
+          "f1": 0.9098,
+          "false_positives": 0,
+          "gold": 1438,
+          "missed": 238,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 1200,
+          "recall": 0.8345
+        },
+        "middle_name": {
+          "covered": 0,
+          "f1": 0.0,
+          "false_positives": 0,
+          "gold": 500,
+          "missed": 500,
+          "partial": 0,
+          "precision": 0.0,
+          "predicted": 0,
+          "recall": 0.0
+        },
+        "name_freeform": {
+          "covered": 253,
+          "f1": 0.6856,
+          "false_positives": 0,
+          "gold": 485,
+          "missed": 232,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 253,
+          "recall": 0.5216
+        },
+        "name_suffix": {
+          "covered": 0,
+          "f1": 0.0,
+          "false_positives": 0,
+          "gold": 386,
+          "missed": 386,
+          "partial": 0,
+          "precision": 0.0,
+          "predicted": 0,
+          "recall": 0.0
+        },
+        "organization": {
+          "covered": 0,
+          "f1": 0.0,
+          "false_positives": 0,
+          "gold": 765,
+          "missed": 765,
+          "partial": 0,
+          "precision": 0.0,
+          "predicted": 0,
+          "recall": 0.0
+        },
+        "phone": {
+          "covered": 2818,
+          "f1": 1.0,
+          "false_positives": 0,
+          "gold": 2818,
+          "missed": 0,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 2818,
+          "recall": 1.0
+        },
+        "postal_code": {
+          "covered": 1129,
+          "f1": 1.0,
+          "false_positives": 0,
+          "gold": 1129,
+          "missed": 0,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 1129,
+          "recall": 1.0
+        },
+        "ssn": {
+          "covered": 605,
+          "f1": 0.7076,
+          "false_positives": 0,
+          "gold": 1105,
+          "missed": 500,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 605,
+          "recall": 0.5475
+        },
+        "state": {
+          "covered": 0,
+          "f1": 0.0,
+          "false_positives": 0,
+          "gold": 1629,
+          "missed": 1629,
+          "partial": 0,
+          "precision": 0.0,
+          "predicted": 0,
+          "recall": 0.0
+        },
+        "street_address": {
+          "covered": 1323,
+          "f1": 1.0,
+          "false_positives": 0,
+          "gold": 1323,
+          "missed": 0,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 1323,
+          "recall": 1.0
+        }
+      },
+      "by_segment": {
+        "AL1": {
+          "covered": 59,
+          "f1": 0.3844,
+          "false_positives": 0,
+          "gold": 248,
+          "missed": 189,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 59,
+          "recall": 0.2379
+        },
+        "DG1": {
+          "covered": 163,
+          "f1": 0.7409,
+          "false_positives": 0,
+          "gold": 277,
+          "missed": 114,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 104,
+          "recall": 0.5884
+        },
+        "EVN": {
+          "covered": 0,
+          "f1": 0.0,
+          "false_positives": 0,
+          "gold": 2000,
+          "missed": 2000,
+          "partial": 0,
+          "precision": 0.0,
+          "predicted": 0,
+          "recall": 0.0
+        },
+        "MSH": {
+          "covered": 0,
+          "f1": 0.0,
+          "false_positives": 0,
+          "gold": 500,
+          "missed": 500,
+          "partial": 0,
+          "precision": 0.0,
+          "predicted": 0,
+          "recall": 0.0
+        },
+        "NK1": {
+          "covered": 1500,
+          "f1": 0.5561,
+          "false_positives": 0,
+          "gold": 3895,
+          "missed": 2395,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 1500,
+          "recall": 0.3851
+        },
+        "NTE": {
+          "covered": 666,
+          "f1": 0.7331,
+          "false_positives": 0,
+          "gold": 1151,
+          "missed": 485,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 625,
+          "recall": 0.5786
+        },
+        "OBX": {
+          "covered": 1570,
+          "f1": 0.8756,
+          "false_positives": 0,
+          "gold": 2016,
+          "missed": 446,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 1177,
+          "recall": 0.7788
+        },
+        "PID": {
+          "covered": 5946,
+          "f1": 0.6875,
+          "false_positives": 0,
+          "gold": 11352,
+          "missed": 5406,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 5946,
+          "recall": 0.5238
+        },
+        "PV1": {
+          "covered": 530,
+          "f1": 0.3464,
+          "false_positives": 0,
+          "gold": 2530,
+          "missed": 2000,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 530,
+          "recall": 0.2095
+        },
+        "ZIN": {
+          "covered": 523,
+          "f1": 0.9694,
+          "false_positives": 0,
+          "gold": 556,
+          "missed": 33,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 523,
+          "recall": 0.9406
+        },
+        "ZPD": {
+          "covered": 583,
+          "f1": 0.7097,
+          "false_positives": 0,
+          "gold": 1060,
+          "missed": 477,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 583,
+          "recall": 0.55
+        }
+      },
+      "detector": "text-only",
+      "duration_ms": 301.8,
+      "messages": 500,
+      "misses_by_location_class": {
+        "narrative": 1234,
+        "nonstandard": 510,
+        "structured": 12301
+      },
+      "spurious_by_phi_type": {
+        "birth_date": 238,
+        "family_name": 237,
+        "medical_record_number": 500
+      },
+      "typed": {
+        "covered": 7881,
+        "f1": 0.4191,
+        "false_positives": 4141,
+        "gold": 25585,
+        "missed": 17704,
+        "partial": 0,
+        "precision": 0.6555,
+        "predicted": 12022,
+        "recall": 0.308
+      },
+      "untyped": {
+        "covered": 11540,
+        "f1": 0.6051,
+        "false_positives": 975,
+        "gold": 25585,
+        "missed": 14045,
+        "partial": 0,
+        "precision": 0.9189,
+        "predicted": 12022,
+        "recall": 0.451
+      }
+    },
+    {
+      "by_location_class": {
+        "misused": {
+          "covered": 102,
+          "f1": 0.7473,
+          "false_positives": 0,
+          "gold": 171,
+          "missed": 69,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 102,
+          "recall": 0.5965
+        },
+        "narrative": {
+          "covered": 2419,
+          "f1": 0.7968,
+          "false_positives": 0,
+          "gold": 3653,
+          "missed": 1234,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 1926,
+          "recall": 0.6622
+        },
+        "nonstandard": {
+          "covered": 848,
+          "f1": 0.6883,
+          "false_positives": 0,
+          "gold": 1616,
+          "missed": 768,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 848,
+          "recall": 0.5248
+        },
+        "structured": {
+          "covered": 20145,
+          "f1": 1.0,
+          "false_positives": 0,
+          "gold": 20145,
+          "missed": 0,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 20145,
+          "recall": 1.0
+        }
+      },
+      "by_phi_type": {
+        "account_number": {
+          "covered": 1134,
+          "f1": 1.0,
+          "false_positives": 0,
+          "gold": 1134,
+          "missed": 0,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 1134,
+          "recall": 1.0
+        },
+        "address_other": {
+          "covered": 790,
+          "f1": 0.9699,
+          "false_positives": 0,
+          "gold": 839,
+          "missed": 49,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 790,
+          "recall": 0.9416
+        },
+        "birth_date": {
+          "covered": 513,
+          "f1": 0.7451,
+          "false_positives": 0,
+          "gold": 864,
+          "missed": 351,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 513,
+          "recall": 0.5938
+        },
+        "city": {
+          "covered": 1000,
+          "f1": 0.9141,
+          "false_positives": 0,
+          "gold": 1188,
+          "missed": 188,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 1000,
+          "recall": 0.8418
+        },
+        "clinician_name": {
+          "covered": 2212,
+          "f1": 0.9744,
+          "false_positives": 0,
+          "gold": 2328,
+          "missed": 116,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 2106,
+          "recall": 0.9502
+        },
+        "county": {
+          "covered": 500,
+          "f1": 1.0,
+          "false_positives": 0,
+          "gold": 500,
+          "missed": 0,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 500,
+          "recall": 1.0
+        },
+        "email": {
+          "covered": 547,
+          "f1": 1.0,
+          "false_positives": 0,
+          "gold": 547,
+          "missed": 0,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 547,
+          "recall": 1.0
+        },
+        "event_date": {
+          "covered": 2500,
+          "f1": 1.0,
+          "false_positives": 0,
+          "gold": 2500,
+          "missed": 0,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 2500,
+          "recall": 1.0
+        },
+        "family_name": {
+          "covered": 1429,
+          "f1": 0.9082,
+          "false_positives": 0,
+          "gold": 1718,
+          "missed": 289,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 1042,
+          "recall": 0.8318
+        },
+        "given_name": {
+          "covered": 1457,
+          "f1": 0.8892,
+          "false_positives": 0,
+          "gold": 1820,
+          "missed": 363,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 1457,
+          "recall": 0.8005
+        },
+        "license_number": {
+          "covered": 569,
+          "f1": 1.0,
+          "false_positives": 0,
+          "gold": 569,
+          "missed": 0,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 569,
+          "recall": 1.0
+        },
+        "medical_record_number": {
+          "covered": 1272,
+          "f1": 0.9387,
+          "false_positives": 0,
+          "gold": 1438,
+          "missed": 166,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 1272,
+          "recall": 0.8846
+        },
+        "middle_name": {
+          "covered": 500,
+          "f1": 1.0,
+          "false_positives": 0,
+          "gold": 500,
+          "missed": 0,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 500,
+          "recall": 1.0
+        },
+        "name_freeform": {
+          "covered": 257,
+          "f1": 0.6927,
+          "false_positives": 0,
+          "gold": 485,
+          "missed": 228,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 257,
+          "recall": 0.5299
+        },
+        "name_suffix": {
+          "covered": 386,
+          "f1": 1.0,
+          "false_positives": 0,
+          "gold": 386,
+          "missed": 0,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 386,
+          "recall": 1.0
+        },
+        "organization": {
+          "covered": 712,
+          "f1": 0.9641,
+          "false_positives": 0,
+          "gold": 765,
+          "missed": 53,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 712,
+          "recall": 0.9307
+        },
+        "phone": {
+          "covered": 2679,
+          "f1": 0.9747,
+          "false_positives": 0,
+          "gold": 2818,
+          "missed": 139,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 2679,
+          "recall": 0.9507
+        },
+        "postal_code": {
+          "covered": 1129,
+          "f1": 1.0,
+          "false_positives": 0,
+          "gold": 1129,
+          "missed": 0,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 1129,
+          "recall": 1.0
+        },
+        "ssn": {
+          "covered": 1105,
+          "f1": 1.0,
+          "false_positives": 0,
+          "gold": 1105,
+          "missed": 0,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 1105,
+          "recall": 1.0
+        },
+        "state": {
+          "covered": 1500,
+          "f1": 0.9588,
+          "false_positives": 0,
+          "gold": 1629,
+          "missed": 129,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 1500,
+          "recall": 0.9208
+        },
+        "street_address": {
+          "covered": 1323,
+          "f1": 1.0,
+          "false_positives": 0,
+          "gold": 1323,
+          "missed": 0,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 1323,
+          "recall": 1.0
+        }
+      },
+      "by_segment": {
+        "AL1": {
+          "covered": 59,
+          "f1": 0.3844,
+          "false_positives": 0,
+          "gold": 248,
+          "missed": 189,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 59,
+          "recall": 0.2379
+        },
+        "DG1": {
+          "covered": 124,
+          "f1": 0.6185,
+          "false_positives": 0,
+          "gold": 277,
+          "missed": 153,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 65,
+          "recall": 0.4477
+        },
+        "EVN": {
+          "covered": 2000,
+          "f1": 1.0,
+          "false_positives": 0,
+          "gold": 2000,
+          "missed": 0,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 2000,
+          "recall": 1.0
+        },
+        "MSH": {
+          "covered": 500,
+          "f1": 1.0,
+          "false_positives": 0,
+          "gold": 500,
+          "missed": 0,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 500,
+          "recall": 1.0
+        },
+        "NK1": {
+          "covered": 3895,
+          "f1": 1.0,
+          "false_positives": 0,
+          "gold": 3895,
+          "missed": 0,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 3895,
+          "recall": 1.0
+        },
+        "NTE": {
+          "covered": 666,
+          "f1": 0.7331,
+          "false_positives": 0,
+          "gold": 1151,
+          "missed": 485,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 625,
+          "recall": 0.5786
+        },
+        "OBX": {
+          "covered": 1570,
+          "f1": 0.8756,
+          "false_positives": 0,
+          "gold": 2016,
+          "missed": 446,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 1177,
+          "recall": 0.7788
+        },
+        "PID": {
+          "covered": 11352,
+          "f1": 1.0,
+          "false_positives": 0,
+          "gold": 11352,
+          "missed": 0,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 11352,
+          "recall": 1.0
+        },
+        "PV1": {
+          "covered": 2500,
+          "f1": 0.994,
+          "false_positives": 0,
+          "gold": 2530,
+          "missed": 30,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 2500,
+          "recall": 0.9881
+        },
+        "ZIN": {
+          "covered": 0,
+          "f1": 0.0,
+          "false_positives": 0,
+          "gold": 556,
+          "missed": 556,
+          "partial": 0,
+          "precision": 0.0,
+          "predicted": 0,
+          "recall": 0.0
+        },
+        "ZPD": {
+          "covered": 848,
+          "f1": 0.8889,
+          "false_positives": 0,
+          "gold": 1060,
+          "missed": 212,
+          "partial": 0,
+          "precision": 1.0,
+          "predicted": 848,
+          "recall": 0.8
+        }
+      },
+      "detector": "schema+regex-narrative",
+      "duration_ms": 707.7,
+      "messages": 500,
+      "misses_by_location_class": {
+        "misused": 69,
+        "narrative": 1234,
+        "nonstandard": 768
+      },
+      "spurious_by_phi_type": {
+        "birth_date": 238,
+        "family_name": 237
+      },
+      "typed": {
+        "covered": 21965,
+        "f1": 0.8951,
+        "false_positives": 1531,
+        "gold": 25585,
+        "missed": 3620,
+        "partial": 0,
+        "precision": 0.9348,
+        "predicted": 23496,
+        "recall": 0.8585
+      },
+      "untyped": {
+        "covered": 23514,
+        "f1": 0.9484,
+        "false_positives": 475,
+        "gold": 25585,
+        "missed": 2071,
+        "partial": 0,
+        "precision": 0.9798,
+        "predicted": 23496,
+        "recall": 0.9191
+      }
+    }
+  ],
+  "scoring": {
+    "caveat": "synthetic planted-PHI corpus: a floor and a methodology demonstration, not production measurement",
+    "precision": "a prediction counts as correct if it overlaps any gold span; over-prediction costs utility, not privacy",
+    "recall": "a gold span counts as found only if a prediction fully covers it; partial coverage still leaks PHI"
+  }
+}

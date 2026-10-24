@@ -1,0 +1,51 @@
+{
+  "messages": 500,
+  "annotations": 25585,
+  "by_location_class": {
+    "structured": 20145,
+    "narrative": 3653,
+    "misused": 171,
+    "nonstandard": 1616
+  },
+  "by_phi_type": {
+    "event_date": 2500,
+    "clinician_name": 2328,
+    "medical_record_number": 1438,
+    "ssn": 1105,
+    "family_name": 1718,
+    "given_name": 1820,
+    "middle_name": 500,
+    "name_suffix": 386,
+    "birth_date": 864,
+    "street_address": 1323,
+    "address_other": 839,
+    "city": 1188,
+    "state": 1629,
+    "postal_code": 1129,
+    "county": 500,
+    "phone": 2818,
+    "email": 547,
+    "account_number": 1134,
+    "license_number": 569,
+    "organization": 765,
+    "name_freeform": 485
+  },
+  "metadata": {
+    "generator": "deid.corpus.generate",
+    "seed": 20261013,
+    "messages": 500,
+    "reference_date": "2026-10-13",
+    "policy": "hl7v2-pid-baseline+hl7v2-extras+hl7v2-financial",
+    "policy_version": 1,
+    "rates": {
+      "narrative": 0.7,
+      "nonstandard": 0.45,
+      "misuse": 0.35,
+      "odd_delimiter": 0.12,
+      "crlf": 0.2,
+      "loose_date": 0.15,
+      "nonstandard_unknown": 0.3
+    },
+    "note": "Synthetic. No production data. Numbers from a planted-PHI corpus are a floor and a methodology demonstration, not a substitute for measurement on production messages."
+  }
+}

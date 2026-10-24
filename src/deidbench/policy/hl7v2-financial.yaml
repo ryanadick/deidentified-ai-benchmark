@@ -1,0 +1,941 @@
+# Guarantor and insurance: GT1, IN1 and the part of IN2 whose fields are
+# unambiguous.
+#
+# These segments were absent from the policy entirely, which meant the
+# guarantor's name, address, birth date and SSN and the insured's member ID
+# passed through un-de-identified. A segment with no rules is not a segment
+# that was considered and retained; it is one nothing looked at.
+#
+# They also carry the relationships a community information exchange reasons
+# over. A homeless patient arrives by ambulance; the insurance card in her
+# pocket names her mother as guarantor; an analyst wants the mother's record for
+# a hereditary indicator. That question is answerable entirely inside the
+# de-identified repository -- without a single re-identification request -- but
+# only if two things hold:
+#
+# 1. **Names, addresses and identifiers here are typed exactly as their PID
+#    counterparts.** Mappings are keyed by scope *and* PHI type, so the same
+#    woman typed ``family_name`` as a patient and ``name_freeform`` as a
+#    guarantor would get two different surrogates and the link would break
+#    silently. Every name component below mirrors PID-5 and NK1-2.
+# 2. **The relationship codes are retained.** GT1-11 and IN1-17 are the edges
+#    of the graph the analyst traverses. They are categorical, identify nobody,
+#    and without them a matching person cannot be known to be the mother.
+#
+# Two cautions carried in the fields below rather than left implicit. The
+# guarantor is a *different person* from the patient, so no identifier here is
+# marked ``patient_key`` -- doing so would merge a mother and her daughter into
+# one vault identity. And the guarantor's own birth date is still shifted by the
+# patient's offset, which is wrong for a second person and is the same
+# limitation NK1-16 carries; it resolves when dates become value-scoped.
+
+name: hl7v2-financial
+version: 1
+
+rules:
+  # -- GT1: guarantor ---------------------------------------------------
+
+  - path: GT1-1
+    phi_type: identifier
+    action: retain
+    data_type: SI
+    note: Set ID. Positional.
+
+  - path: GT1-2.1
+    phi_type: account_number
+    action: surrogate
+    data_type: CX
+    note: >
+      Guarantor number. Surrogated but deliberately *not* a patient key: the
+      guarantor is frequently someone other than the patient, and keying on it
+      would link a mother's record to her daughter's as one person.
+
+  - path: GT1-3.1
+    phi_type: family_name
+    action: surrogate
+    data_type: XPN
+    note: >
+      Guarantor family name, typed as PID-5.1 is so that the same person shares
+      one surrogate whether they appear here or as a patient.
+
+  - path: GT1-3.2
+    phi_type: given_name
+    action: surrogate
+    data_type: XPN
+    sex_from: GT1-9
+    sex_from_relationship: GT1-11
+    note: >
+      Guarantor given name, agreeing with the guarantor's own sex in GT1-9 and
+      falling back to the relationship in GT1-11, where MTH means female
+      whatever GT1-9 holds.
+
+  - path: GT1-3.3
+    phi_type: middle_name
+    action: surrogate
+    data_type: XPN
+    sex_from: GT1-9
+    sex_from_relationship: GT1-11
+
+  - path: GT1-3.4
+    phi_type: name_suffix
+    action: surrogate
+    data_type: XPN
+
+  - path: GT1-3.5
+    phi_type: name_prefix
+    action: retain
+    data_type: XPN
+    note: Prefix. Retained, as PID-5.5 is.
+
+  - path: GT1-3.6
+    phi_type: name_prefix
+    action: redact
+    data_type: XPN
+    note: Degree. Redacted, as PID-5.6 is.
+
+  - path: GT1-4.1
+    phi_type: family_name
+    action: surrogate
+    data_type: XPN
+    note: Guarantor spouse name.
+
+  - path: GT1-4.2
+    phi_type: given_name
+    action: surrogate
+    data_type: XPN
+
+  - path: GT1-4.3
+    phi_type: middle_name
+    action: surrogate
+    data_type: XPN
+
+  - path: GT1-5.1
+    phi_type: street_address
+    action: surrogate
+    data_type: XAD
+    note: >
+      Guarantor address. Typed as PID-11 and NK1-4 are, so a shared household
+      maps to one surrogate address and household analysis survives.
+
+  - path: GT1-5.2
+    phi_type: address_other
+    action: surrogate
+    data_type: XAD
+
+  - path: GT1-5.3
+    phi_type: city
+    action: surrogate
+    data_type: XAD
+
+  - path: GT1-5.4
+    phi_type: state
+    action: surrogate
+    data_type: XAD
+
+  - path: GT1-5.5
+    phi_type: postal_code
+    action: surrogate
+    data_type: XAD
+
+  - path: GT1-5.6
+    phi_type: country
+    action: retain
+    data_type: XAD
+
+  - path: GT1-5.7
+    phi_type: identifier
+    action: retain
+    data_type: XAD
+    note: Address type code (H, B, M). Categorical.
+
+  - path: GT1-5.9
+    phi_type: county
+    action: surrogate
+    data_type: XAD
+
+  - path: GT1-6.1
+    phi_type: phone
+    action: surrogate
+    data_type: XTN
+    note: Guarantor home phone. A shared household line maps consistently.
+
+  - path: GT1-6.4
+    phi_type: email
+    action: surrogate
+    data_type: XTN
+
+  - path: GT1-7.1
+    phi_type: phone
+    action: surrogate
+    data_type: XTN
+    note: Guarantor business phone.
+
+  - path: GT1-8
+    phi_type: birth_date
+    action: shift_birth_date
+    data_type: TS
+    note: >
+      Guarantor birth date. Shifted by the *patient's* birth offset, which is
+      the wrong offset for a different person -- the same limitation NK1-16
+      carries. It is also what currently prevents matching a guarantor to their
+      own patient record on date of birth, because the two appearances of one
+      date are shifted differently. Value-scoped dates fix both.
+
+  - path: GT1-9
+    phi_type: identifier
+    action: retain
+    data_type: IS
+    note: >
+      Guarantor administrative sex. Categorical, retained, and the source
+      GT1-3's name surrogate agrees with.
+
+  - path: GT1-10
+    phi_type: identifier
+    action: retain
+    data_type: IS
+    note: Guarantor type. Categorical.
+
+  - path: GT1-11
+    phi_type: identifier
+    action: retain
+    data_type: CE
+    note: >
+      Guarantor relationship (MTH, FTH, SEL, SPO). Retained deliberately: this
+      is the edge of the family graph, it identifies nobody on its own, and
+      without it a matched person cannot be known to be the mother.
+
+  - path: GT1-12
+    phi_type: ssn
+    action: surrogate
+    data_type: ST
+    note: Guarantor SSN.
+
+  - path: GT1-13
+    phi_type: event_date
+    action: shift_event_date
+    data_type: DT
+    note: Guarantor begin date.
+
+  - path: GT1-14
+    phi_type: event_date
+    action: shift_event_date
+    data_type: DT
+    note: Guarantor end date.
+
+  - path: GT1-15
+    phi_type: identifier
+    action: retain
+    data_type: NM
+    note: Guarantor priority. Positional.
+
+  - path: GT1-16.1
+    phi_type: organization
+    action: surrogate
+    data_type: XPN
+    note: >
+      Guarantor employer name. An employer is a quasi-identifier of the person,
+      unlike a payer, so it is surrogated rather than retained.
+
+  - path: GT1-17.1
+    phi_type: street_address
+    action: surrogate
+    data_type: XAD
+    note: Guarantor employer address.
+
+  - path: GT1-17.3
+    phi_type: city
+    action: surrogate
+    data_type: XAD
+
+  - path: GT1-17.4
+    phi_type: state
+    action: surrogate
+    data_type: XAD
+
+  - path: GT1-17.5
+    phi_type: postal_code
+    action: surrogate
+    data_type: XAD
+
+  - path: GT1-18.1
+    phi_type: phone
+    action: surrogate
+    data_type: XTN
+    note: Guarantor employer phone.
+
+  - path: GT1-19.1
+    phi_type: identifier
+    action: surrogate
+    data_type: CX
+    note: Guarantor employee ID.
+
+  - path: GT1-20
+    phi_type: identifier
+    action: retain
+    data_type: IS
+    note: Employment status. Categorical.
+
+  - path: GT1-21.1
+    phi_type: organization
+    action: surrogate
+    data_type: XON
+    note: Guarantor organization name, when the guarantor is an organization.
+
+  - path: GT1-22
+    phi_type: identifier
+    action: retain
+    data_type: ID
+    note: Billing hold flag.
+
+  - path: GT1-23
+    phi_type: identifier
+    action: retain
+    data_type: CE
+    note: Credit rating code. Categorical; a site may prefer to redact it.
+
+  - path: GT1-24
+    phi_type: death_date
+    action: shift_event_date
+    data_type: TS
+    note: Guarantor death date, shifted by the event offset as PID-29 is.
+
+  - path: GT1-25
+    phi_type: identifier
+    action: retain
+    data_type: ID
+    note: Death flag.
+
+  - path: GT1-26
+    phi_type: identifier
+    action: retain
+    data_type: CE
+    note: Charge adjustment code. Categorical.
+
+  - path: GT1-27
+    phi_type: identifier
+    action: retain
+    data_type: CP
+    note: >
+      Household annual income. Not a HIPAA identifier and a social determinant
+      worth analysing, so retained; it is a quasi-identifier in a small cohort
+      and a site may override.
+
+  - path: GT1-28
+    phi_type: identifier
+    action: retain
+    data_type: NM
+    note: Household size. Retained for the same reason.
+
+  - path: GT1-29.1
+    phi_type: identifier
+    action: surrogate
+    data_type: CX
+    note: Guarantor employer ID.
+
+  - path: GT1-30
+    phi_type: identifier
+    action: retain
+    data_type: CE
+    note: Marital status. Categorical.
+
+  - path: GT1-31
+    phi_type: event_date
+    action: shift_event_date
+    data_type: DT
+    note: Hire effective date.
+
+  - path: GT1-32
+    phi_type: event_date
+    action: shift_event_date
+    data_type: DT
+    note: Employment stop date.
+
+  - path: GT1-33
+    phi_type: identifier
+    action: retain
+    data_type: IS
+    note: Living dependency. Categorical and a social determinant.
+
+  - path: GT1-34
+    phi_type: identifier
+    action: retain
+    data_type: IS
+    note: Ambulatory status.
+
+  - path: GT1-35
+    phi_type: identifier
+    action: retain
+    data_type: CE
+    note: Citizenship.
+
+  - path: GT1-36
+    phi_type: identifier
+    action: retain
+    data_type: CE
+    note: Primary language.
+
+  - path: GT1-37
+    phi_type: identifier
+    action: retain
+    data_type: IS
+    note: Living arrangement. Categorical and a social determinant.
+
+  - path: GT1-38
+    phi_type: identifier
+    action: retain
+    data_type: CE
+    note: Publicity code.
+
+  - path: GT1-39
+    phi_type: identifier
+    action: retain
+    data_type: ID
+    note: Protection indicator.
+
+  - path: GT1-40
+    phi_type: identifier
+    action: retain
+    data_type: IS
+    note: Student indicator.
+
+  - path: GT1-41
+    phi_type: identifier
+    action: retain
+    data_type: CE
+    note: Religion.
+
+  - path: GT1-42.1
+    phi_type: family_name
+    action: surrogate
+    data_type: XPN
+    note: Guarantor mother's maiden name, surrogated as PID-6.1 is.
+
+  - path: GT1-43
+    phi_type: identifier
+    action: retain
+    data_type: CE
+    note: Nationality.
+
+  - path: GT1-44
+    phi_type: identifier
+    action: retain
+    data_type: CE
+    note: Ethnic group.
+
+  - path: GT1-45.1
+    phi_type: family_name
+    action: surrogate
+    data_type: XPN
+    note: Contact person's name.
+
+  - path: GT1-45.2
+    phi_type: given_name
+    action: surrogate
+    data_type: XPN
+
+  - path: GT1-46.1
+    phi_type: phone
+    action: surrogate
+    data_type: XTN
+    note: Contact person's phone.
+
+  - path: GT1-47
+    phi_type: identifier
+    action: retain
+    data_type: CE
+    note: Contact reason. Categorical.
+
+  - path: GT1-48
+    phi_type: identifier
+    action: retain
+    data_type: IS
+    note: Contact relationship. Another graph edge; categorical.
+
+  - path: GT1-49
+    phi_type: identifier
+    action: retain
+    data_type: ST
+    note: Job title. Retained for analytic use; rare titles narrow a population.
+
+  - path: GT1-50
+    phi_type: identifier
+    action: retain
+    data_type: JCC
+    note: Job code and class. Categorical.
+
+  - path: GT1-51.1
+    phi_type: organization
+    action: surrogate
+    data_type: XON
+    note: Guarantor employer's organization name.
+
+  - path: GT1-52
+    phi_type: identifier
+    action: retain
+    data_type: IS
+    note: Handicap. Categorical.
+
+  - path: GT1-53
+    phi_type: identifier
+    action: retain
+    data_type: IS
+    note: Job status. Categorical.
+
+  - path: GT1-54
+    phi_type: identifier
+    action: retain
+    data_type: FC
+    note: Guarantor financial class.
+
+  - path: GT1-55
+    phi_type: identifier
+    action: retain
+    data_type: CE
+    note: Guarantor race. Categorical, retained for analytic utility.
+
+  - path: GT1-56
+    phi_type: organization
+    action: surrogate
+    data_type: ST
+    note: Guarantor birth place, surrogated as PID-23 is.
+
+  - path: GT1-57
+    phi_type: identifier
+    action: retain
+    data_type: IS
+    note: VIP indicator.
+
+  # -- IN1: insurance ---------------------------------------------------
+  #
+  # The payer is an institution, so its name, address and phone are retained --
+  # the same reasoning that retains PID-3.4's assigning authority. What is
+  # surrogated here is the *insured person*: their name, birth date, address and
+  # member ID. That person is often the guarantor and often a parent, which is
+  # what makes IN1-16 and IN1-49 the fields a community exchange follows.
+
+  - path: IN1-1
+    phi_type: identifier
+    action: retain
+    data_type: SI
+    note: Set ID.
+
+  - path: IN1-2
+    phi_type: identifier
+    action: retain
+    data_type: CE
+    note: Insurance plan ID. Names a plan, not a person.
+
+  - path: IN1-3.1
+    phi_type: identifier
+    action: retain
+    data_type: CX
+    note: Insurance company ID.
+
+  - path: IN1-4.1
+    phi_type: identifier
+    action: retain
+    data_type: XON
+    note: >
+      Insurance company name. An institution rather than a person, and payer
+      mix is a routine analytic variable.
+
+  - path: IN1-5.1
+    phi_type: identifier
+    action: retain
+    data_type: XAD
+    note: Insurance company address.
+
+  - path: IN1-6.1
+    phi_type: family_name
+    action: surrogate
+    data_type: XPN
+    note: Insurance company contact person. A person, so surrogated.
+
+  - path: IN1-6.2
+    phi_type: given_name
+    action: surrogate
+    data_type: XPN
+
+  - path: IN1-7.1
+    phi_type: identifier
+    action: retain
+    data_type: XTN
+    note: Insurance company phone. The payer's switchboard, not a patient's line.
+
+  - path: IN1-8
+    phi_type: identifier
+    action: retain
+    data_type: ST
+    note: >
+      Group number. Shared by every member of an employer plan, so it does not
+      identify an individual; it does narrow to an employer, and a site with
+      small groups may prefer to surrogate it.
+
+  - path: IN1-9.1
+    phi_type: organization
+    action: surrogate
+    data_type: XON
+    note: Group name, which names the employer and so the person's workplace.
+
+  - path: IN1-10.1
+    phi_type: identifier
+    action: surrogate
+    data_type: CX
+    note: Insured's group employee ID.
+
+  - path: IN1-11.1
+    phi_type: organization
+    action: surrogate
+    data_type: XON
+    note: Insured's group employer name.
+
+  - path: IN1-12
+    phi_type: event_date
+    action: shift_event_date
+    data_type: DT
+    note: Plan effective date.
+
+  - path: IN1-13
+    phi_type: event_date
+    action: shift_event_date
+    data_type: DT
+    note: Plan expiration date.
+
+  - path: IN1-14.1
+    phi_type: identifier
+    action: surrogate
+    data_type: AUI
+    note: Authorization information.
+
+  - path: IN1-15
+    phi_type: identifier
+    action: retain
+    data_type: IS
+    note: Plan type. Categorical.
+
+  - path: IN1-16.1
+    phi_type: family_name
+    action: surrogate
+    data_type: XPN
+    note: >
+      Name of insured, typed as PID-5.1 so one person shares a surrogate across
+      both roles. With IN1-17 this is how a patient's record points at a
+      parent's record inside the de-identified repository.
+
+  - path: IN1-16.2
+    phi_type: given_name
+    action: surrogate
+    data_type: XPN
+    sex_from: IN1-43
+    sex_from_relationship: IN1-17
+    note: >
+      Insured's given name, agreeing with IN1-43 and falling back to the
+      relationship in IN1-17.
+
+  - path: IN1-16.3
+    phi_type: middle_name
+    action: surrogate
+    data_type: XPN
+    sex_from: IN1-43
+    sex_from_relationship: IN1-17
+
+  - path: IN1-17
+    phi_type: identifier
+    action: retain
+    data_type: CE
+    note: >
+      Insured's relationship to patient. Retained: the other graph edge, and
+      categorical.
+
+  - path: IN1-18
+    phi_type: birth_date
+    action: shift_birth_date
+    data_type: TS
+    note: Insured's birth date. Carries the same wrong-offset caveat as GT1-8.
+
+  - path: IN1-19.1
+    phi_type: street_address
+    action: surrogate
+    data_type: XAD
+    note: Insured's address.
+
+  - path: IN1-19.2
+    phi_type: address_other
+    action: surrogate
+    data_type: XAD
+
+  - path: IN1-19.3
+    phi_type: city
+    action: surrogate
+    data_type: XAD
+
+  - path: IN1-19.4
+    phi_type: state
+    action: surrogate
+    data_type: XAD
+
+  - path: IN1-19.5
+    phi_type: postal_code
+    action: surrogate
+    data_type: XAD
+
+  - path: IN1-20
+    phi_type: identifier
+    action: retain
+    data_type: IS
+    note: Assignment of benefits.
+
+  - path: IN1-21
+    phi_type: identifier
+    action: retain
+    data_type: IS
+    note: Coordination of benefits.
+
+  - path: IN1-22
+    phi_type: identifier
+    action: retain
+    data_type: ST
+    note: Coordination of benefits priority.
+
+  - path: IN1-23
+    phi_type: identifier
+    action: retain
+    data_type: ID
+    note: Notice of admission flag.
+
+  - path: IN1-24
+    phi_type: event_date
+    action: shift_event_date
+    data_type: DT
+    note: Notice of admission date.
+
+  - path: IN1-25
+    phi_type: identifier
+    action: retain
+    data_type: ID
+    note: Report of eligibility flag.
+
+  - path: IN1-26
+    phi_type: event_date
+    action: shift_event_date
+    data_type: DT
+    note: Report of eligibility date.
+
+  - path: IN1-27
+    phi_type: identifier
+    action: retain
+    data_type: IS
+    note: Release information code.
+
+  - path: IN1-28
+    phi_type: identifier
+    action: surrogate
+    data_type: ST
+    note: Pre-admit certification number.
+
+  - path: IN1-29
+    phi_type: event_date
+    action: shift_event_date
+    data_type: TS
+    note: Verification date and time.
+
+  - path: IN1-30.2
+    phi_type: clinician_name
+    action: surrogate
+    data_type: XCN
+    note: Verified by, family name. A staff member rather than a patient.
+
+  - path: IN1-30.3
+    phi_type: clinician_name
+    action: surrogate
+    data_type: XCN
+
+  - path: IN1-31
+    phi_type: identifier
+    action: retain
+    data_type: IS
+    note: Type of agreement code.
+
+  - path: IN1-32
+    phi_type: identifier
+    action: retain
+    data_type: IS
+    note: Billing status.
+
+  - path: IN1-33
+    phi_type: identifier
+    action: retain
+    data_type: NM
+    note: Lifetime reserve days.
+
+  - path: IN1-34
+    phi_type: identifier
+    action: retain
+    data_type: NM
+    note: Delay before lifetime reserve day.
+
+  - path: IN1-35
+    phi_type: identifier
+    action: retain
+    data_type: IS
+    note: Company plan code.
+
+  - path: IN1-36
+    phi_type: identifier
+    action: surrogate
+    data_type: ST
+    note: >
+      Policy number. Individually assigned, so surrogated; globally scoped, so
+      the same policy maps alike wherever it appears.
+
+  - path: IN1-37
+    phi_type: identifier
+    action: retain
+    data_type: CP
+    note: Policy deductible.
+
+  - path: IN1-38
+    phi_type: identifier
+    action: retain
+    data_type: CP
+    note: Policy limit amount.
+
+  - path: IN1-39
+    phi_type: identifier
+    action: retain
+    data_type: NM
+    note: Policy limit days.
+
+  - path: IN1-40
+    phi_type: identifier
+    action: retain
+    data_type: CP
+    note: Semi-private room rate.
+
+  - path: IN1-41
+    phi_type: identifier
+    action: retain
+    data_type: CP
+    note: Private room rate.
+
+  - path: IN1-42
+    phi_type: identifier
+    action: retain
+    data_type: CE
+    note: Insured's employment status. Categorical.
+
+  - path: IN1-43
+    phi_type: identifier
+    action: retain
+    data_type: IS
+    note: >
+      Insured's administrative sex. Categorical, and the source IN1-16's name
+      surrogate agrees with.
+
+  - path: IN1-44.1
+    phi_type: street_address
+    action: surrogate
+    data_type: XAD
+    note: Insured's employer address.
+
+  - path: IN1-44.3
+    phi_type: city
+    action: surrogate
+    data_type: XAD
+
+  - path: IN1-44.4
+    phi_type: state
+    action: surrogate
+    data_type: XAD
+
+  - path: IN1-44.5
+    phi_type: postal_code
+    action: surrogate
+    data_type: XAD
+
+  - path: IN1-45
+    phi_type: identifier
+    action: retain
+    data_type: ST
+    note: Verification status.
+
+  - path: IN1-46
+    phi_type: identifier
+    action: retain
+    data_type: IS
+    note: Prior insurance plan ID.
+
+  - path: IN1-47
+    phi_type: identifier
+    action: retain
+    data_type: IS
+    note: Coverage type.
+
+  - path: IN1-48
+    phi_type: identifier
+    action: retain
+    data_type: IS
+    note: Handicap. Categorical.
+
+  - path: IN1-49.1
+    phi_type: identifier
+    action: surrogate
+    data_type: CX
+    note: >
+      Insured's ID number -- the member number on the card. Individually
+      assigned and globally scoped, so it is the most reliable link between a
+      patient's record and the record of whoever holds the policy.
+
+  - path: IN1-50
+    phi_type: identifier
+    action: retain
+    data_type: IS
+    note: Signature code.
+
+  - path: IN1-51
+    phi_type: event_date
+    action: shift_event_date
+    data_type: DT
+    note: Signature code date.
+
+  - path: IN1-52
+    phi_type: organization
+    action: surrogate
+    data_type: ST
+    note: Insured's birth place, as PID-23 is.
+
+  - path: IN1-53
+    phi_type: identifier
+    action: retain
+    data_type: IS
+    note: VIP indicator.
+
+  # -- IN2: additional insurance ----------------------------------------
+  #
+  # Only the first three fields are covered. IN2 has seventy-two, many of them
+  # site-specific or rarely sent, and a rule written against a field number
+  # guessed wrong is worse than no rule: it surrogates the wrong thing while
+  # reading as coverage. The rest of IN2 is therefore a known gap, recorded in
+  # the README rather than papered over -- and the general fix is a
+  # deny-by-default action for a whole segment, which the policy format cannot
+  # yet express.
+
+  - path: IN2-1.1
+    phi_type: identifier
+    action: surrogate
+    data_type: CX
+    note: Insured's employee ID.
+
+  - path: IN2-2
+    phi_type: ssn
+    action: surrogate
+    data_type: ST
+    note: >
+      Insured's SSN. Typed as PID-19 and GT1-12 are, so one SSN has one
+      surrogate wherever it appears.
+
+  - path: IN2-3.2
+    phi_type: organization
+    action: surrogate
+    data_type: XCN
+    note: Insured's employer name.

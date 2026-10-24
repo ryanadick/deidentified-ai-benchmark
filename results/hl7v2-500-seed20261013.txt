@@ -1,0 +1,63 @@
+CORPUS
+  500 messages, 25585 annotated PHI spans
+  structured=20145  narrative=3653  nonstandard=1616  misused=171
+
+OVERALL (untyped: would this have been removed?)
+  detector                    recall    prec      F1  missed  partial      FP       ms
+  rules-only                   0.825   1.000   0.904    4490        0       0      630
+  text-only                    0.451   0.919   0.605   14045        0     975      302
+  schema+regex-narrative       0.919   0.980   0.948    2071        0     475      708
+
+TYPED (would it have been replaced with the right kind of surrogate?)
+  detector                    recall    prec      F1
+  rules-only                   0.801   0.971   0.878
+  text-only                    0.308   0.656   0.419
+  schema+regex-narrative       0.859   0.935   0.895
+
+RECALL BY LOCATION CLASS
+  detector                      structured     narrative   nonstandard       misused
+  rules-only                    1.000         0.000         0.525         0.596     
+  text-only                     0.389         0.662         0.684         1.000     
+  schema+regex-narrative        1.000         0.662         0.525         0.596     
+
+RECALL BY SEGMENT
+  detector                       ZIN     ZPD     AL1     DG1     EVN     MSH     NK1     NTE     OBX     PID     PV1
+  rules-only                    0.00    0.80    0.00    0.00    1.00    1.00    1.00    0.00    0.00    1.00    0.99
+  text-only                     0.94    0.55    0.24    0.59    0.00    0.00    0.39    0.58    0.78    0.52    0.21
+  schema+regex-narrative        0.00    0.80    0.24    0.45    1.00    1.00    1.00    0.58    0.78    1.00    0.99
+  ZPD is a Z-segment the shipped policy describes; ZIN is one it has
+  never seen. The gap between them is how much of the non-standard
+  problem is solved only by having read the feed first.
+
+WORST PHI TYPES BY RECALL
+  rules-only
+    name_freeform            recall 0.437  (212/485)
+    given_name               recall 0.549  (1000/1820)
+    birth_date               recall 0.579  (500/864)
+    family_name              recall 0.582  (1000/1718)
+    street_address           recall 0.756  (1000/1323)
+    phone                    recall 0.808  (2277/2818)
+  text-only
+    event_date               recall 0.000  (0/2500)
+    middle_name              recall 0.000  (0/500)
+    name_suffix              recall 0.000  (0/386)
+    address_other            recall 0.000  (0/839)
+    city                     recall 0.000  (0/1188)
+    state                    recall 0.000  (0/1629)
+  schema+regex-narrative
+    name_freeform            recall 0.530  (257/485)
+    birth_date               recall 0.594  (513/864)
+    given_name               recall 0.801  (1457/1820)
+    family_name              recall 0.832  (1429/1718)
+    city                     recall 0.842  (1000/1188)
+    medical_record_number    recall 0.885  (1272/1438)
+
+TOP FALSE-POSITIVE CATEGORIES
+  rules-only: none
+  text-only: medical_record_number=500, birth_date=238, family_name=237
+  schema+regex-narrative: birth_date=238, family_name=237
+
+Scoring: recall requires full coverage of a gold span (partial coverage
+still leaks PHI); precision credits any overlap. Synthetic planted-PHI
+corpus -- a floor and a methodology demonstration, not production
+measurement.

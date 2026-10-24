@@ -1,0 +1,568 @@
+# Every field of the HL7 v2 PID segment, per v2.5.1.
+#
+# Completeness is the point. A policy that covers "the important ones" leaves a
+# reviewer unable to tell whether PID-23 was considered and retained or simply
+# forgotten, so every field from PID-1 to PID-39 appears here with an explicit
+# action -- including the ones that are retained.
+#
+# Fields are retained only when they carry no identifying information and
+# removing them would cost clinical utility: sex, race, ethnicity, language,
+# marital status, religion. These are not HIPAA identifiers and downstream
+# analytic tasks depend on them.
+
+name: hl7v2-pid-baseline
+version: 1
+
+rules:
+  - path: PID-1
+    phi_type: identifier
+    action: retain
+    data_type: SI
+    note: Set ID. Positional, not identifying.
+
+  # -- identifiers -----------------------------------------------------
+
+  - path: PID-2.1
+    phi_type: medical_record_number
+    action: surrogate
+    data_type: CX
+    patient_key: true
+    key_namespace: pid2
+    note: Deprecated external patient ID, still sent by older systems.
+
+  - path: PID-3.1
+    phi_type: medical_record_number
+    action: surrogate
+    data_type: CX
+    patient_key: true
+    key_namespace_component: 4
+    phi_type_component: 5
+    phi_type_by_code:
+      MR: medical_record_number
+      MA: medical_record_number
+      MC: medical_record_number
+      PI: medical_record_number
+      PT: medical_record_number
+      SS: ssn
+      SB: ssn
+      DL: license_number
+      AN: account_number
+      AM: account_number
+      NI: identifier
+      NPI: identifier
+    note: >
+      Patient identifier list. Repeats, carrying MRN, SSN and plan IDs in one
+      field. The assigning authority in component 4 is part of the key: MRN
+      12345 from two hospitals is two different patients.
+
+      The identifier type code in component 5 selects the PHI category, because
+      the category here is in the data rather than in the path. Typing every
+      repetition as a medical record number gives an SSN sent in PID-3 a
+      different surrogate from the same SSN in PID-19 -- two surrogates for one
+      value, which breaks joins across fields and tells a reader that both
+      surrogates stand for one identifier. An unrecognized code falls back to
+      medical_record_number, so a code this list does not name is still
+      surrogated.
+
+  - path: PID-3.4
+    phi_type: organization
+    action: retain
+    data_type: HD
+    note: >
+      Assigning authority. Retained because routing and identity resolution
+      depend on it, and it names an institution rather than a person.
+
+  - path: PID-3.5
+    phi_type: identifier
+    action: retain
+    data_type: ID
+    note: Identifier type code (MR, SS, DL). Categorical.
+
+  - path: PID-4.1
+    phi_type: medical_record_number
+    action: surrogate
+    data_type: CX
+    patient_key: true
+    key_namespace: pid4
+    note: Alternate patient ID.
+
+  # -- names -----------------------------------------------------------
+
+  - path: PID-5.1
+    phi_type: family_name
+    action: surrogate
+    data_type: XPN
+    note: Family name. Repeats for legal, alias and maiden names.
+
+  - path: PID-5.2
+    phi_type: given_name
+    action: surrogate
+    data_type: XPN
+    sex_from: PID-8
+    note: >
+      Given name, drawn from the names that ordinarily signal the sex in
+      PID-8. The reason is data quality rather than privacy: de-identified
+      messages are loaded into clinical analysis tools, and a male patient
+      called Alice reads as corrupt data -- or worse, is analysed as a
+      pregnant male. PID-8 is retained as clinically essential, so agreeing
+      with it discloses nothing the message did not already carry.
+
+  - path: PID-5.3
+    phi_type: middle_name
+    action: surrogate
+    data_type: XPN
+    sex_from: PID-8
+    note: >
+      Middle name or initial. Matched to PID-8 for the same reason the given
+      name is: a male patient with the middle name Rebecca reads as corrupt
+      data to whatever tool loads the extract. An initial is shorter than any
+      name in the pool, so it falls through to a letter substitution and the
+      sex constraint does not apply to it.
+
+  - path: PID-5.4
+    phi_type: name_suffix
+    action: surrogate
+    data_type: XPN
+
+  - path: PID-5.5
+    phi_type: name_prefix
+    action: retain
+    data_type: XPN
+    note: >
+      Prefix (MR, MRS, DR). Retained. It identifies nobody on its own, and
+      what it does carry -- sex, and sometimes clinical title -- is already
+      sent in PID-8 and useful downstream. Replacing it produced surrogates
+      like "Uw.", which is not a word in any register and makes the output
+      read as corrupt.
+
+  - path: PID-5.6
+    phi_type: name_prefix
+    action: redact
+    data_type: XPN
+    note: >
+      Degree. Redacted rather than surrogated: a patient with "MD" here is
+      unusual enough to narrow the population.
+
+  - path: PID-5.7
+    phi_type: identifier
+    action: retain
+    data_type: ID
+    note: Name type code (L, A, M). Categorical, and needed to tell a legal
+      name from an alias.
+
+  - path: PID-6.1
+    phi_type: family_name
+    action: surrogate
+    data_type: XPN
+    note: >
+      Mother's maiden name. A classic knowledge-based authentication secret as
+      well as an identifier, so it is surrogated like any other name.
+
+  - path: PID-6.2
+    phi_type: given_name
+    action: surrogate
+    data_type: XPN
+    assumed_sex: female
+    note: >
+      Mother's maiden given name. No sex code is sent here because the field's
+      own definition fixes it, and a male first name in a mother's maiden name
+      reads as corrupt data for the same reason a pregnant male does.
+
+  - path: PID-6.3
+    phi_type: middle_name
+    action: surrogate
+    data_type: XPN
+    assumed_sex: female
+
+  # -- dates and demographics ------------------------------------------
+
+  - path: PID-7
+    phi_type: birth_date
+    action: shift_birth_date
+    data_type: TS
+    note: >
+      Birth date. Shifted by the patient's birth offset, which is the event
+      offset plus a jitter bounded by the age band -- days for newborns, about
+      two years for older adults. Ages of 90 and over are pinned into one
+      bucket as Safe Harbor requires.
+
+  - path: PID-8
+    phi_type: identifier
+    action: retain
+    data_type: IS
+    note: >
+      Administrative sex. Not an identifier; clinically essential, and the
+      source PID-5 and PID-9 name surrogates agree with.
+
+  - path: PID-9.1
+    phi_type: family_name
+    action: surrogate
+    data_type: XPN
+    note: Patient alias.
+
+  - path: PID-9.2
+    phi_type: given_name
+    action: surrogate
+    data_type: XPN
+    sex_from: PID-8
+    note: Alias given name. The alias is the same person, so the same rule.
+
+  - path: PID-9.3
+    phi_type: middle_name
+    action: surrogate
+    data_type: XPN
+    sex_from: PID-8
+    note: Alias middle name. Same person, same rule.
+
+  - path: PID-10
+    phi_type: identifier
+    action: retain
+    data_type: CE
+    note: Race. Categorical, retained for analytic utility.
+
+  # -- address ---------------------------------------------------------
+
+  - path: PID-11.1
+    phi_type: street_address
+    action: surrogate
+    data_type: XAD
+    note: >
+      Street address. The house number is replaced digit for digit and the
+      street name by a different street name of the same length; the street
+      type (Street, Avenue) is kept, since it identifies nobody and address
+      validators check it.
+
+  - path: PID-11.2
+    phi_type: address_other
+    action: surrogate
+    data_type: XAD
+    note: Other designation, e.g. "Apt 4B". Unit words stay, the unit changes.
+
+  - path: PID-11.3
+    phi_type: city
+    action: surrogate
+    data_type: XAD
+
+  - path: PID-11.4
+    phi_type: state
+    action: surrogate
+    data_type: XAD
+    note: State or province, replaced with a different two-letter code.
+
+  - path: PID-11.5
+    phi_type: postal_code
+    action: surrogate
+    data_type: XAD
+    note: >
+      Postal code. Digit for digit by default, per the stated rule. Safe
+      Harbor's own form is the first three digits plus 00, available as the
+      truncate_postal_code option -- and valid only where that three-digit area
+      covers more than 20,000 people.
+
+  - path: PID-11.6
+    phi_type: country
+    action: retain
+    data_type: XAD
+    note: Country. Too coarse to identify, useful for interpreting the rest.
+
+  - path: PID-11.7
+    phi_type: identifier
+    action: retain
+    data_type: ID
+    note: Address type code (H, M, B). Categorical.
+
+  - path: PID-11.8
+    phi_type: address_other
+    action: redact
+    data_type: XAD
+    note: Other geographic designation. Free-form and rarely populated.
+
+  - path: PID-11.9
+    phi_type: county
+    action: surrogate
+    data_type: XAD
+    note: County. A HIPAA geographic identifier below state level.
+
+  - path: PID-11.10
+    phi_type: address_other
+    action: redact
+    data_type: XAD
+    note: >
+      Census tract. Redacted outright: a tract is small enough to be
+      effectively identifying and there is no useful surrogate for one.
+
+  - path: PID-12
+    phi_type: county
+    action: surrogate
+    data_type: IS
+    note: County code.
+
+  # -- contact ---------------------------------------------------------
+
+  - path: PID-13.1
+    phi_type: phone
+    action: surrogate
+    data_type: XTN
+    note: >
+      Home phone, as sent. Repeats. Separators are preserved exactly, so
+      (716)555-0142 becomes (585)273-8891 and still passes a format check.
+
+  - path: PID-13.2
+    phi_type: identifier
+    action: retain
+    data_type: ID
+    note: Telecommunication use code (PRN, WPN). Categorical.
+
+  - path: PID-13.3
+    phi_type: identifier
+    action: retain
+    data_type: ID
+    note: Telecommunication equipment type (PH, CP, FX). Categorical.
+
+  - path: PID-13.4
+    phi_type: email
+    action: surrogate
+    data_type: XTN
+    note: Email address, which HL7 places inside the phone field.
+
+  - path: PID-13.5
+    phi_type: phone
+    action: surrogate
+    data_type: XTN
+    note: Country code.
+
+  - path: PID-13.6
+    phi_type: phone
+    action: surrogate
+    data_type: XTN
+    note: Area or city code, sent separately by some systems.
+
+  - path: PID-13.7
+    phi_type: phone
+    action: surrogate
+    data_type: XTN
+    note: Local number.
+
+  - path: PID-13.8
+    phi_type: phone
+    action: surrogate
+    data_type: XTN
+    note: Extension.
+
+  - path: PID-13.9
+    phi_type: free_text
+    action: defer_to_model
+    data_type: XTN
+    note: >
+      Any text. A free-text comment on a phone number routinely contains "call
+      daughter Nina at work" -- rules cannot resolve it.
+
+  - path: PID-13.12
+    phi_type: phone
+    action: surrogate
+    data_type: XTN
+    note: Unformatted telephone number (v2.7+).
+
+  - path: PID-14.1
+    phi_type: phone
+    action: surrogate
+    data_type: XTN
+    note: Business phone. Repeats.
+
+  - path: PID-14.4
+    phi_type: email
+    action: surrogate
+    data_type: XTN
+
+  - path: PID-14.7
+    phi_type: phone
+    action: surrogate
+    data_type: XTN
+
+  - path: PID-14.12
+    phi_type: phone
+    action: surrogate
+    data_type: XTN
+
+  # -- retained categoricals -------------------------------------------
+
+  - path: PID-15
+    phi_type: identifier
+    action: retain
+    data_type: CE
+    note: Primary language.
+
+  - path: PID-16
+    phi_type: identifier
+    action: retain
+    data_type: CE
+    note: Marital status.
+
+  - path: PID-17
+    phi_type: identifier
+    action: retain
+    data_type: CE
+    note: Religion.
+
+  # -- more identifiers ------------------------------------------------
+
+  - path: PID-18.1
+    phi_type: account_number
+    action: surrogate
+    data_type: CX
+    patient_key: true
+    key_namespace: account
+    note: Patient account number. Often the join key for billing extracts.
+
+  - path: PID-19
+    phi_type: ssn
+    action: surrogate
+    data_type: ST
+    patient_key: true
+    key_namespace: ssn
+    note: >
+      Social security number. The surrogate is placed in the 900-999 area,
+      which has never been issued, so it cannot collide with a living person's
+      SSN the way nine random digits could.
+
+  - path: PID-20.1
+    phi_type: license_number
+    action: surrogate
+    data_type: DLN
+    note: Driver's license number.
+
+  - path: PID-20.2
+    phi_type: state
+    action: surrogate
+    data_type: DLN
+    note: Issuing state or province.
+
+  - path: PID-20.3
+    phi_type: event_date
+    action: shift_event_date
+    data_type: DLN
+    note: License expiration date.
+
+  - path: PID-21.1
+    phi_type: identifier
+    action: surrogate
+    data_type: CX
+    note: >
+      Mother's identifier. Links a newborn to the mother's record, so it is as
+      identifying as the newborn's own MRN. Not registered as a patient key:
+      it identifies a different person.
+
+  - path: PID-22
+    phi_type: identifier
+    action: retain
+    data_type: CE
+    note: Ethnic group.
+
+  - path: PID-23
+    phi_type: organization
+    action: surrogate
+    data_type: ST
+    note: >
+      Birth place. Free text in practice, holding anything from a city to a
+      hospital name, so the organization surrogate keeps structural words and
+      replaces the proper nouns.
+
+  - path: PID-24
+    phi_type: identifier
+    action: retain
+    data_type: ID
+    note: Multiple birth indicator.
+
+  - path: PID-25
+    phi_type: identifier
+    action: retain
+    data_type: NM
+    note: Birth order. Clinically relevant for multiples.
+
+  - path: PID-26
+    phi_type: identifier
+    action: retain
+    data_type: CE
+    note: Citizenship.
+
+  - path: PID-27
+    phi_type: identifier
+    action: retain
+    data_type: CE
+    note: Veterans military status.
+
+  - path: PID-28
+    phi_type: identifier
+    action: retain
+    data_type: CE
+    note: Nationality.
+
+  - path: PID-29
+    phi_type: death_date
+    action: shift_event_date
+    data_type: TS
+    note: >
+      Death date and time. Shifted by the event offset, not the birth offset,
+      so the interval from every encounter to death is preserved exactly.
+
+  - path: PID-30
+    phi_type: identifier
+    action: retain
+    data_type: ID
+    note: Death indicator.
+
+  - path: PID-31
+    phi_type: identifier
+    action: retain
+    data_type: ID
+    note: Identity unknown indicator.
+
+  - path: PID-32
+    phi_type: identifier
+    action: retain
+    data_type: IS
+    note: Identity reliability code.
+
+  - path: PID-33
+    phi_type: event_date
+    action: shift_event_date
+    data_type: TS
+    note: Last update date/time.
+
+  - path: PID-34.1
+    phi_type: organization
+    action: surrogate
+    data_type: HD
+    note: Last update facility.
+
+  # -- veterinary fields, retained --------------------------------------
+
+  - path: PID-35
+    phi_type: identifier
+    action: retain
+    data_type: CE
+    note: Species code.
+
+  - path: PID-36
+    phi_type: identifier
+    action: retain
+    data_type: CE
+    note: Breed code.
+
+  - path: PID-37
+    phi_type: identifier
+    action: retain
+    data_type: ST
+    note: Strain.
+
+  - path: PID-38
+    phi_type: identifier
+    action: retain
+    data_type: CE
+    note: Production class code.
+
+  - path: PID-39
+    phi_type: identifier
+    action: retain
+    data_type: CWE
+    note: Tribal citizenship.
