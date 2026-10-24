@@ -11,6 +11,10 @@ authors:
 repository-code: "https://github.com/ryanadick/deidentified-ai-benchmark"
 license: MIT
 version: 0.1.0
+identifiers:
+  - type: doi
+    value: "10.5281/zenodo.23623786"
+    description: "Concept DOI — always resolves to the latest version"
 abstract: >-
   A reproducible benchmark for protected health information (PHI) detection in
   HL7 v2 messages. Existing de-identification tools and evaluations target

@@ -1,5 +1,9 @@
 # deidbench: a reproducible PHI-detection benchmark for HL7 v2
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23623786.svg)](https://doi.org/10.5281/zenodo.23623786)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
+
 Existing de-identification tools and the papers that evaluate them were built for
 free-text clinical notes. Clinical data does not move as notes. It moves as HL7 v2
 messages, C-CDA documents and FHIR resources, where protected health information
@@ -146,8 +150,15 @@ variants from production feeds that break the generator's assumptions.
 
 ## Citing this work
 
-See [`CITATION.cff`](CITATION.cff). Please cite the version you ran, and quote the
-caveats with the numbers.
+> Dick, R. (2026). *deidbench: a reproducible PHI-detection benchmark for HL7 v2*.
+> Zenodo. https://doi.org/10.5281/zenodo.23623786
+
+That DOI always resolves to the latest version. If you are reporting a number,
+cite the **version** DOI of the release you actually ran — each release has its
+own — so the figure and the code that produced it stay attached. Machine-readable
+metadata is in [`CITATION.cff`](CITATION.cff).
+
+Please quote the caveats with the numbers.
 
 ## License and patents
 
