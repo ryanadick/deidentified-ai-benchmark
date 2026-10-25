@@ -41,6 +41,7 @@ DEFAULT_SEED = 20261013
 BASELINE_ARMS: tuple[tuple[str, str, str], ...] = (
     ("presidio", "PresidioTextDetector", "PresidioNarrativeDetector"),
     ("philter", "PhilterTextDetector", "PhilterNarrativeDetector"),
+    ("scrubber", "ScrubberTextDetector", "ScrubberNarrativeDetector"),
 )
 
 
@@ -149,6 +150,8 @@ def _cmd_evaluate(args) -> int:
     for spec in BASELINE_ARMS:
         detectors.extend(_baseline_detectors(spec, getattr(args, spec[0]), policy))
 
+    _prime_batched_detectors(detectors, corpus, policy)
+
     report = evaluate(corpus, detectors)
 
     print(render(report))
@@ -194,6 +197,59 @@ def _baseline_detectors(spec: tuple[str, str, str], mode: str, policy) -> list:
             narrative_detector=getattr(module, narrative_cls)(), policy=policy
         ),
     ]
+
+
+def _prime_batched_detectors(detectors: list, corpus, policy) -> None:
+    """Pre-scrub every text a batched arm will be asked about.
+
+    Most detectors answer one message at a time. NLM Scrubber cannot: it is a
+    binary that spends most of a minute loading dictionaries *per invocation*,
+    so asking it about one string at a time would take days over this corpus.
+    It instead runs once over everything and caches by content hash, which
+    means it has to be told the full set of inputs up front.
+
+    For the flattened arm that is just the messages. For the narrative arm it
+    is every location the policy defers, which the schema-conditioned detector
+    can enumerate without running any detector at all -- that is what
+    ``candidates()`` is for.
+    """
+    batched = [d for d in detectors if hasattr(d, "prime")]
+    nested = [
+        d.narrative_detector
+        for d in detectors
+        if isinstance(d, SchemaConditionedDetector)
+        and hasattr(getattr(d, "narrative_detector", None), "prime")
+    ]
+    if not batched and not nested:
+        return
+
+    messages = [message.text for message in corpus.messages]
+
+    if batched:
+        print(
+            f"priming {len(batched)} batched detector(s) over "
+            f"{len(messages)} messages",
+            file=sys.stderr,
+        )
+        for detector in batched:
+            detector.prime(messages)
+
+    if nested:
+        walker = SchemaConditionedDetector(policy=policy)
+        candidates = sorted(
+            {
+                candidate.text
+                for message in corpus.messages
+                for candidate in walker.candidates(message.text)
+            }
+        )
+        print(
+            f"priming {len(nested)} batched narrative detector(s) over "
+            f"{len(candidates)} deferred locations",
+            file=sys.stderr,
+        )
+        for detector in nested:
+            detector.prime(candidates)
 
 
 def _resolve_policy(paths: list[Path]):

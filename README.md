@@ -30,9 +30,11 @@ commands below; the committed runs are in [`results/`](results/).
 | text-only, ours (flattened) | 0.451 | 0.919 | 0.308 | 0.389 | 0.662 | 0.55 | 0.94 |
 | **Presidio** (flattened) | 0.506 | 0.841 | 0.143 | 0.460 | 0.717 | 0.55 | 0.71 |
 | **Philter** (flattened) | 0.738 | 0.879 | 0.000 | 0.731 | 0.785 | 0.75 | 0.69 |
+| **NLM Scrubber** (flattened) | 0.321 | 0.895 | 0.023 | 0.271 | 0.743 | 0.00 | 0.00 |
 | schema-conditioned + regex narrative | 0.919 | 0.980 | 0.859 | 1.000 | 0.662 | 0.80 | 0.00 |
 | schema-conditioned + Presidio narrative | 0.932 | 0.977 | 0.845 | 1.000 | 0.755 | 0.80 | 0.00 |
-| **schema-conditioned + Philter narrative** | **0.936** | 0.977 | 0.801 | 1.000 | 0.779 | 0.80 | 0.00 |
+| schema-conditioned + Philter narrative | 0.936 | 0.977 | 0.801 | 1.000 | 0.779 | 0.80 | 0.00 |
+| **schema-conditioned + Scrubber narrative** | **0.936** | **0.984** | 0.825 | 1.000 | 0.784 | 0.80 | 0.00 |
 
 Path-based rules are perfect on the fields they were written for and score zero
 on narrative, because no path-based rule finds a name someone typed into `OBX-5`.
@@ -40,22 +42,34 @@ The gap between `ZPD` (0.80, a Z-segment the shipped policy describes) and `ZIN`
 (0.00, one it has never seen) measures how much of the non-standard problem is
 solved only by having already read the feed.
 
-**The mirror-image failure is real, but it belongs to NER, not to text-only
-detection as such.** Presidio reproduces it exactly: 0.460 on structured fields
-against 0.717 on narrative. It finds names in prose and misses them in
-`Vanbrugh^Bartram`, because a caret is not a linguistic cue.
+**The three published tools line up on exactly one axis: how much they depend on
+linguistic context.** Compare each tool's structured recall against its own
+narrative recall:
 
-**Philter does not, and that is the most useful thing in this table.** It scores
-0.731 on structured fields — nearly as high as on narrative — because it is not
-looking for PHI at all. Philter keeps only what its filter set confirms is
-*safe* and redacts everything else, so caret-delimited name components fall to it
-without any linguistic signal. At 0.738 overall it is far stronger than Presidio
-(0.506) and than our own stand-in (0.451).
+| tool | structured | narrative | ratio | approach |
+|---|---|---|---|---|
+| NLM Scrubber | 0.271 | 0.743 | **0.36** | NLP over prose |
+| Presidio | 0.460 | 0.717 | **0.64** | NER + pattern recognizers |
+| Philter | 0.731 | 0.785 | **0.93** | whitelist — redact what isn't provably safe |
+
+That ordering is the central finding. The more a tool reasons about text the way
+a reader does, the worse it does on a structured message — because in `PID-5`
+there is no sentence, and `Vanbrugh^Bartram` offers no linguistic cue at all.
+Philter nearly closes the gap precisely because it is *not* looking for PHI: it
+keeps only what its filters confirm is safe and redacts the rest, so
+caret-delimited name components fall to it with no signal required.
 
 So the blanket claim that free-text tools fail on structured HL7 is **too broad,
-and this benchmark now corrects it.** It holds for NER-based detection. It does
-not hold for whitelist-based redaction. That distinction only became visible by
-running a second published tool, which is the argument for not stopping at one.
+and this benchmark corrects it.** It holds, strongly, for context-dependent
+detection. It does not hold for whitelist-based redaction. That distinction was
+invisible with one comparator — the argument for not stopping at Presidio.
+
+**Scrubber is the sharpest illustration and the weakest arm.** Its *published*
+NAME recall is 0.9393 on i2b2 prose notes. Here it catches names in `OBX`/`NTE`
+prose and leaves `Everman^Clara^Jean^JR` untouched, scoring 0.02 on `PV1`, 0.05
+on `NK1`, and **0.00 in Z-segments of either kind**. One tool, the same
+identifier type, only the shape of the data changed. That is the thesis of this
+repository in a single row.
 
 Philter's cost shows up in the three columns next to its recall. It has the
 highest false-positive count of any arm (2,788), and its **typed recall is
@@ -70,13 +84,19 @@ Note also what the `chars x` column rules out: at 0.9, Philter is **not** buying
 that recall by flagging everything. The obvious explanation for an aggressive
 redactor scoring well is over-flagging, and the guard says no.
 
-The architecture still wins, and now with a published tool on **both sides** of
-the comparison. Philter flattened scores 0.738; Philter behind schema
-conditioning scores 0.936, the best arm in the table. Holding the detector fixed
-and changing only the architecture is worth **+0.198 recall** against Philter and
-+0.426 against Presidio. The honest summary is that the architectural gain is
-real and robust across two independent tools, and considerably smaller than the
-Presidio-only figure suggested.
+The architecture wins with a published tool on **both sides** of the comparison,
+and now three times independently. Holding the detector fixed and changing only
+the architecture is worth **+0.198 recall** against Philter, **+0.426** against
+Presidio and **+0.615** against Scrubber. The gain is real and robust across
+three tools of quite different design — and its size depends heavily on which
+tool you measure it with, so quoting any single figure would be cherry-picking.
+
+The best arm is schema-conditioned + Scrubber at 0.936 recall and **0.984
+precision**, the highest precision of any arm with a model in it. That is worth
+reading carefully rather than as a win: Scrubber contributes *less* to that arm
+than the others do, so more of it is the rules, which is also why its false
+positives are the lowest (378). A weak narrative detector behind strong schema
+conditioning can look like a strong system.
 
 ## Install and reproduce
 
@@ -88,7 +108,7 @@ pip install -e ".[dev]"
 deidbench corpus --out corpus.jsonl --messages 500 --seed 20261013
 deidbench evaluate corpus.jsonl --json results.json
 
-pytest            # 113 tests; baseline tests skip without their extras
+pytest            # 128 tests; baseline tests skip without their extras
 ```
 
 To reproduce the **published-baseline** rows as well, install the optional
@@ -103,13 +123,31 @@ python -m nltk.downloader averaged_perceptron_tagger \
 deidbench evaluate corpus.jsonl --presidio --philter --json results.json
 ```
 
+**NLM Scrubber** is a binary distribution, not a Python package, so it has no
+pip extra and is **not redistributed here** — the download page states no
+redistribution terms, so you fetch it yourself:
+
+```bash
+# Linux x86_64 build, v.19.0403L
+# https://lhncbc.nlm.nih.gov/scrubber/download.html
+# archive sha256: 4dbe08a458433c3dac71007ce17ae81b7d0f392e1370daedb3c65da47f79e48d
+unzip scrubber.19.0403L.zip
+export DEIDBENCH_SCRUBBER=$PWD/scrubber.19.0403L/scrubber.19.0403.lnx
+
+deidbench evaluate corpus.jsonl --presidio --philter --scrubber --json results.json
+```
+
+On a host that is not x86-64 Linux — including Apple Silicon — the benchmark runs
+it through Docker under `linux/amd64` emulation automatically. Override the image
+with `DEIDBENCH_SCRUBBER_IMAGE` if `debian:bullseye` doesn't suit.
+
 `--presidio` and `--philter` fail loudly if the tool is missing, which is what a
 reproduction wants. Without the flags each baseline's arms are included when
 importable and skipped with a note on stderr when not, so a partial run can
 never be mistaken for the full published table. `--no-presidio` and
 `--no-philter` drop them.
 
-Three notes on those extras, all of which cost time to rediscover:
+Notes on those extras, all of which cost time to rediscover:
 
 - **Python 3.12, not 3.13.** The pinned spaCy stack has no 3.13 wheels. The
   package declares 3.12 and is tested there.
@@ -185,7 +223,7 @@ sits between 0.6 and 1.0, so none of these figures are bought by over-flagging �
 but that is now a measured fact in the report rather than an assumption, and a
 future arm that games the rules will show it in that column.
 
-## Seven caveats that bound what these numbers can be used for
+## Eight caveats that bound what these numbers can be used for
 
 These travel with the numbers. The last one is printed at the bottom of every
 report so it cannot be separated from the figures.
@@ -195,15 +233,15 @@ report so it cannot be separated from the figures.
    against the fields they were authored against. The `misused` and `ZIN`
    categories exist to approximate what production does instead, and rules score
    0.596 and 0.000 there.
-2. **`text-only` is our own detector; `presidio-text` and `philter-text` are the
-   published ones.** The `text-only` arm is a regex-and-heuristic detector we
+2. **`text-only` is our own detector; the Presidio, Philter and Scrubber arms
+   are the published ones.** The `text-only` arm is a regex-and-heuristic detector we
    wrote, kept because it is the arm behind the originally published figures and
    because its rules can be read in `eval/detectors.py` where a statistical model
    can only be run. Its **0.451 is not any named tool's score and must never be
    reported as one** — each tool has its own row. Measured against the published
    pair, our stand-in was a weak opponent: 0.451 against Presidio's 0.506 and
-   Philter's 0.738. NLM Scrubber is still to come, so this is two tools, not the
-   field.
+   Philter's 0.738, though stronger than Scrubber's 0.321. Three published tools
+   is not the field, but it is enough to show they do not fail alike.
 3. **None of the narrative detectors is the intended model.**
    `RegexNarrativeDetector` is a placeholder that establishes a floor. Presidio
    and Philter in the narrative seam are real published tools and the two best
@@ -245,12 +283,30 @@ report so it cannot be separated from the figures.
    bug-fixes in *whitelist* filters, so the fork treats marginally more text as
    safe and if anything under-redacts relative to published Philter. Report this
    row as "Philter (philter-lite port)".
-6. **Bare honorifics are not annotated as PHI.** `Mr`/`Dr` is placed in `PID-5.5`
+6. **The Scrubber arm's spans are inferred, not reported — and its recall is a
+   band.** Presidio returns offsets and Philter returns a coordinate map;
+   Scrubber returns *redacted text* with inline `[PERSONALNAME]`-style tags,
+   which changes the document length and shifts every later offset. Every span
+   in that arm is recovered by aligning its output against the original, so this
+   is the one arm whose numbers depend on our inference rather than the tool's
+   report. The guard is a round-trip requirement: recovered spans must
+   reconstruct Scrubber's output byte-for-byte, and a message that fails is
+   excluded rather than scored. All 500 messages and all 984 deferred locations
+   pass. Separately, one Scrubber tag can replace a run far wider than the PHI
+   inside it — 17.7% of regions cover more than one gold span, carrying 62.1% of
+   its credited spans. Under this benchmark's full-coverage rule those count, so
+   the arm scores **0.321**; crediting only spans that do not depend on an
+   over-broad region gives **0.121**. Over-flagging in aggregate stays low (0.6×
+   characters), so this is a few wide regions rather than blanket redaction.
+   Also note the binary is unmaintained since 2019, has five tags, runs under
+   emulation here, and — because it is batched — its `ms` figure counts cache
+   lookups, not work, and is not comparable to the other arms.
+7. **Bare honorifics are not annotated as PHI.** `Mr`/`Dr` is placed in `PID-5.5`
    but not treated as ground truth: a title from a closed set of five values is
    not a name, so HIPAA's "Names" identifier does not reach it. Annotating it
    charged every arm a miss for correctly leaving it alone, and buried the 171 real
    field-misuse cases under 400 artifacts.
-7. **Planted-PHI corpora measure what you planted.** These numbers are a floor and
+8. **Planted-PHI corpora measure what you planted.** These numbers are a floor and
    a methodology demonstration. They are not a substitute for measurement on
    production messages, and nothing written up from them should imply otherwise.
 
@@ -258,7 +314,7 @@ report so it cannot be separated from the figures.
 
 This repository is the measurement half of a larger system. The published part is
 everything needed to regenerate the corpus and reproduce the figures above:
-the HL7 v2 parser, the corpus generator, the HL7 v2 policy, the seven detector
+the HL7 v2 parser, the corpus generator, the HL7 v2 policy, the nine detector
 arms and the scoring harness.
 
 Not published, because none of it is needed to check a number: surrogate

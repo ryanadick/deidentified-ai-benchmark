@@ -4,17 +4,23 @@ CORPUS
 
 OVERALL (untyped: would this have been removed?)
   detector                    recall    prec      F1  missed  partial      FP  chars x       ms
-  rules-only                   0.825   1.000   0.904    4490        0       0      0.8      634
-  text-only                    0.451   0.919   0.605   14045        0     975      0.6      304
-  schema+regex-narrative       0.919   0.980   0.948    2071        0     475      0.9      732
-  presidio-text                0.506   0.841   0.632   12631     1808    1902      0.8    16776
-  schema+presidio-narrative    0.932   0.977   0.954    1731      125     548      1.0     8025
-  philter-text                 0.738   0.879   0.802    6708     1311    2788      0.9    17634
-  schema+philter-narrative     0.936   0.977   0.956    1645      110     564      1.0     4015
+  rules-only                   0.825   1.000   0.904    4490        0       0      0.8      639
+  text-only                    0.451   0.919   0.605   14045        0     975      0.6      302
+  schema+regex-narrative       0.919   0.980   0.948    2071        0     475      0.9      783
+  presidio-text                0.506   0.841   0.632   12631     1808    1902      0.8    15719
+  schema+presidio-narrative    0.932   0.977   0.954    1731      125     548      1.0     8920
+  philter-text                 0.738   0.879   0.802    6708     1311    2788      0.9    17636
+  schema+philter-narrative     0.936   0.977   0.956    1645      110     564      1.0     4493
+  scrubber-text                0.321   0.895   0.472   17379     1479     603      0.6      122
+  schema+scrubber-narrative    0.936   0.984   0.960    1627      261     378      1.0      770
   'chars x' is characters flagged per character of real PHI. A span
   that swallows a whole segment covers every gold span inside it, so
   it earns recall and precision at once; a ratio far above 1.0 means
   that arm's rates are upper bounds, not clean detections.
+  'ms' is not comparable across all arms. An arm marked batched in
+  the provenance below does its real work in a priming pass before
+  scoring starts, so its figure here counts cache lookups only and
+  understates the tool by orders of magnitude.
 
 TYPED (would it have been replaced with the right kind of surrogate?)
   detector                    recall    prec      F1
@@ -25,6 +31,8 @@ TYPED (would it have been replaced with the right kind of surrogate?)
   schema+presidio-narrative    0.845   0.907   0.875
   philter-text                 0.000   0.000   0.000
   schema+philter-narrative     0.801   0.847   0.824
+  scrubber-text                0.023   0.103   0.037
+  schema+scrubber-narrative    0.825   0.878   0.851
 
 RECALL BY LOCATION CLASS
   detector                      structured     narrative   nonstandard       misused
@@ -35,6 +43,8 @@ RECALL BY LOCATION CLASS
   schema+presidio-narrative     1.000         0.755         0.525         0.596     
   philter-text                  0.731         0.785         0.730         0.596     
   schema+philter-narrative      1.000         0.779         0.525         0.596     
+  scrubber-text                 0.271         0.743         0.000         0.193     
+  schema+scrubber-narrative     1.000         0.784         0.525         0.596     
 
 RECALL BY SEGMENT
   detector                       ZIN     ZPD     AL1     DG1     EVN     MSH     NK1     NTE     OBX     PID     PV1
@@ -45,6 +55,8 @@ RECALL BY SEGMENT
   schema+presidio-narrative     0.00    0.80    0.95    0.68    1.00    1.00    1.00    0.66    0.78    1.00    0.99
   philter-text                  0.69    0.75    0.63    0.50    0.80    1.00    0.58    0.86    0.78    0.74    0.83
   schema+philter-narrative      0.00    0.80    0.63    0.45    1.00    1.00    1.00    0.86    0.78    1.00    0.99
+  scrubber-text                 0.00    0.00    0.81    0.62    0.06    0.86    0.05    0.76    0.72    0.41    0.02
+  schema+scrubber-narrative     0.00    0.80    0.81    0.62    1.00    1.00    1.00    0.80    0.78    1.00    0.99
   ZPD is a Z-segment the shipped policy describes; ZIN is one it has
   never seen. The gap between them is how much of the non-standard
   problem is solved only by having read the feed first.
@@ -99,6 +111,20 @@ WORST PHI TYPES BY RECALL
     given_name               recall 0.881  (1604/1820)
     medical_record_number    recall 0.885  (1272/1438)
     clinician_name           recall 0.933  (2173/2328)
+  scrubber-text
+    county                   recall 0.000  (0/500)
+    address_other            recall 0.020  (17/839)
+    name_freeform            recall 0.027  (13/485)
+    street_address           recall 0.091  (121/1323)
+    birth_date               recall 0.097  (84/864)
+    name_suffix              recall 0.109  (42/386)
+  schema+scrubber-narrative
+    name_freeform            recall 0.520  (252/485)
+    birth_date               recall 0.594  (513/864)
+    street_address           recall 0.847  (1121/1323)
+    family_name              recall 0.867  (1489/1718)
+    medical_record_number    recall 0.903  (1299/1438)
+    organization             recall 0.931  (712/765)
 
 TOP FALSE-POSITIVE CATEGORIES
   rules-only: none
@@ -108,12 +134,16 @@ TOP FALSE-POSITIVE CATEGORIES
   schema+presidio-narrative: event_date=376, organization=166, city=5, family_name=1
   philter-text: unmapped:OTHER=2550, event_date=238
   schema+philter-narrative: unmapped:OTHER=326, event_date=238
+  scrubber-text: event_date=238, family_name=211, identifier=137, street_address=17
+  schema+scrubber-narrative: event_date=238, family_name=140
 
 BASELINE PROVENANCE
   presidio-text: configuration=default recognizers, no score threshold, presidio-analyzer=2.2.364, score_threshold=0.0, spacy=3.7.5, spacy_model=en_core_web_lg, spacy_model_version=3.7.1
   schema+presidio-narrative: configuration=default recognizers, no score threshold, presidio-analyzer=2.2.364, score_threshold=0.0, spacy=3.7.5, spacy_model=en_core_web_lg, spacy_model_version=3.7.1
   philter-text: config=philter_delta, configuration=published philter_delta filter set, untuned, distribution=philter-lite (fork of philter-ucsf), nltk=3.10.4, philter-lite=0.6.0, tool=philter
   schema+philter-narrative: config=philter_delta, configuration=published philter_delta filter set, untuned, distribution=philter-lite (fork of philter-ucsf), nltk=3.10.4, philter-lite=0.6.0, tool=philter
+  scrubber-text: archive_sha256=4dbe08a458433c3dac71007ce17ae81b7d0f392e1370daedb3c65da47f79e48d, batched=True, binary_sha256=62738930855cd7f978338488b59bc51e17ddd37b5a9e55248e0a31b94248a88d, configuration=default parameters, no preserved-terms whitelist, credit_merged_regions=True, emulated=True, image=debian:bullseye, spans=recovered by alignment; not reported by the tool, tool=nlm-scrubber, version=19.0403L
+  schema+scrubber-narrative: archive_sha256=4dbe08a458433c3dac71007ce17ae81b7d0f392e1370daedb3c65da47f79e48d, batched=True, binary_sha256=62738930855cd7f978338488b59bc51e17ddd37b5a9e55248e0a31b94248a88d, configuration=default parameters, no preserved-terms whitelist, credit_merged_regions=True, emulated=True, image=debian:bullseye, spans=recovered by alignment; not reported by the tool, tool=nlm-scrubber, version=19.0403L
   A third-party baseline's version is part of its score. Reporting
   the number without it is not a reproducible comparison.
 
