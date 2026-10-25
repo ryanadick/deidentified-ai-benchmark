@@ -33,6 +33,18 @@ dev = [
 # load en_core_web_lg and produce the committed Presidio figures. The model
 # itself is not installable from PyPI -- see the README for the one extra
 # command.
+# Philter, the second published baseline. This is philter-lite, a BSD fork of
+# UCSF's philter-ucsf, and the substitution is forced rather than chosen: 324
+# of the 617 regex filter files in the published philter_delta set put an
+# inline (?i) flag mid-pattern, which Python has rejected as an error since
+# 3.11, so philter-ucsf cannot run on any Python this package supports. The
+# fork's patterns are the published ones with the flag relocated, which is
+# semantics-preserving; tests/test_philter_baseline.py pins that claim against
+# the published filter files. Needs NLTK tagger data -- see the README.
+philter = [
+    "philter-lite>=0.6,<1.0",
+    "nltk>=3.8",
+]
 presidio = [
     "presidio-analyzer>=2.2,<3.0",
     "spacy==3.7.5",

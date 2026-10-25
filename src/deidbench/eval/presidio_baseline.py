@@ -45,6 +45,16 @@ under an ``unmapped:`` prefix so they still count against precision and show up
 by name in the report's false-positive breakdown. Dropping them would quietly
 flatter Presidio by hiding predictions it actually made.
 
+**Ties are broken deterministically, which Presidio does not do for us.**
+Presidio can return the same span under two entity types with equal confidence
+-- a bare number that is equally a bank account and a driver's licence. Which
+one survives overlap resolution depended on the order Presidio emitted them,
+and that order varies between processes with Python's hash randomization. The
+untyped score was unaffected (the span is identical either way) but the typed
+score drifted by ~13 spans per 500 messages between runs. ``stable_span_order``
+imposes a total order so every process resolves ties the same way. See its
+docstring for why alphabetical-by-type is a fine answer and drift is not.
+
 **One post-processing step is applied, and it is ours, not Presidio's.**
 Overlapping predictions are reduced to the longest, via the same
 ``_resolve_overlaps`` every other arm uses. Presidio's recognizers do overlap
@@ -62,7 +72,12 @@ import functools
 from dataclasses import dataclass
 
 from ..surrogate.types import PhiType
-from .detectors import Detection, NarrativeCandidate, _resolve_overlaps
+from .detectors import (
+    Detection,
+    NarrativeCandidate,
+    _resolve_overlaps,
+    stable_span_order,
+)
 
 #: The spaCy model behind the published figures. Presidio's own default, and
 #: pinned here because the NER model is part of the result: a different model
@@ -193,17 +208,19 @@ class _PresidioRunner:
     #: recognizers return, which is the untuned configuration.
     score_threshold: float = 0.0
 
-    def analyze(self, text: str) -> list[tuple[int, int, str, float]]:
+    def analyze(self, text: str) -> list[tuple[int, int, str]]:
         analyzer = _build_analyzer(self.spacy_model)
         results = analyzer.analyze(
             text=text,
             language="en",
             score_threshold=self.score_threshold,
         )
-        return [
-            (result.start, result.end, map_entity_type(result.entity_type), result.score)
-            for result in results
-        ]
+        return stable_span_order(
+            [
+                (result.start, result.end, map_entity_type(result.entity_type))
+                for result in results
+            ]
+        )
 
 
 class PresidioTextDetector:
@@ -240,7 +257,7 @@ class PresidioTextDetector:
                 phi_type=phi_type,
                 source=self.name,
             )
-            for start, end, phi_type, _score in self._runner.analyze(text)
+            for start, end, phi_type in self._runner.analyze(text)
         ]
         return _resolve_overlaps(detections)
 
@@ -282,7 +299,4 @@ class PresidioNarrativeDetector:
         }
 
     def detect_in(self, candidate: NarrativeCandidate) -> list[tuple[int, int, str]]:
-        return [
-            (start, end, phi_type)
-            for start, end, phi_type, _score in self._runner.analyze(candidate.text)
-        ]
+        return self._runner.analyze(candidate.text)

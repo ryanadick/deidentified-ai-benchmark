@@ -7,10 +7,11 @@ Both are deterministic. The same seed produces the same corpus byte for byte,
 which is the whole point: a number nobody else can regenerate is an assertion,
 not a result.
 
-``evaluate`` runs three arms with no optional dependency, plus two Microsoft
-Presidio arms when Presidio is installed. ``--presidio`` makes those arms
-mandatory and fails loudly without them, which is what a reproduction of the
-published table wants; ``--no-presidio`` runs the three-arm subset.
+``evaluate`` runs three arms with no optional dependency, plus two arms for
+each published baseline that is installed -- Microsoft Presidio and Philter
+today, NLM Scrubber to come. ``--presidio`` and ``--philter`` make those arms
+mandatory and fail loudly without them, which is what a reproduction of the
+published table wants; ``--no-presidio`` and ``--no-philter`` drop them.
 """
 
 from __future__ import annotations
@@ -18,6 +19,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from importlib import import_module
 from pathlib import Path
 
 from .corpus.annotation import Corpus as AnnotatedCorpus
@@ -31,6 +33,15 @@ from .eval.harness import evaluate, render
 from .policy.registry import load_default_policy, load_policy
 
 DEFAULT_SEED = 20261013
+
+#: The published baselines, in report order. Each is an optional dependency
+#: behind one uniform contract: a ``deidbench.eval.<name>_baseline`` module
+#: exposing ``<name>_available()``, ``_IMPORT_HINT``, and a flattened plus a
+#: narrative detector class. Adding NLM Scrubber should be one more row.
+BASELINE_ARMS: tuple[tuple[str, str, str], ...] = (
+    ("presidio", "PresidioTextDetector", "PresidioNarrativeDetector"),
+    ("philter", "PhilterTextDetector", "PhilterNarrativeDetector"),
+)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -82,22 +93,25 @@ def _build_parser() -> argparse.ArgumentParser:
         default=[],
         help="override the bundled policy; repeatable, merged in order",
     )
-    presidio_group = evaluate_parser.add_mutually_exclusive_group()
-    presidio_group.add_argument(
-        "--presidio",
-        dest="presidio",
-        action="store_const",
-        const="require",
-        help="require the Presidio baseline arms; fail if Presidio is missing",
-    )
-    presidio_group.add_argument(
-        "--no-presidio",
-        dest="presidio",
-        action="store_const",
-        const="skip",
-        help="skip the Presidio arms even if Presidio is installed",
-    )
-    evaluate_parser.set_defaults(handler=_cmd_evaluate, presidio="auto")
+    defaults = {"handler": _cmd_evaluate}
+    for name, _text_cls, _narrative_cls in BASELINE_ARMS:
+        group = evaluate_parser.add_mutually_exclusive_group()
+        group.add_argument(
+            f"--{name}",
+            dest=name,
+            action="store_const",
+            const="require",
+            help=f"require the {name} baseline arms; fail if {name} is missing",
+        )
+        group.add_argument(
+            f"--no-{name}",
+            dest=name,
+            action="store_const",
+            const="skip",
+            help=f"skip the {name} arms even if {name} is installed",
+        )
+        defaults[name] = "auto"
+    evaluate_parser.set_defaults(**defaults)
 
     return parser
 
@@ -132,7 +146,8 @@ def _cmd_evaluate(args) -> int:
         FlattenedTextDetector(),
         SchemaConditionedDetector(policy=policy),
     ]
-    detectors.extend(_presidio_detectors(args.presidio, policy))
+    for spec in BASELINE_ARMS:
+        detectors.extend(_baseline_detectors(spec, getattr(args, spec[0]), policy))
 
     report = evaluate(corpus, detectors)
 
@@ -144,45 +159,39 @@ def _cmd_evaluate(args) -> int:
     return 0
 
 
-def _presidio_detectors(mode: str, policy) -> list:
-    """The two Presidio arms, if they can run.
+def _baseline_detectors(spec: tuple[str, str, str], mode: str, policy) -> list:
+    """The two arms for one published baseline, if they can run.
 
-    Presidio is an optional dependency, so a missing install is not an error by
-    default -- but it is never silent either. The published table includes the
-    Presidio arms, and a run that quietly omitted them would look like the
-    published run while measuring something smaller.
+    Every baseline is an optional dependency, so a missing install is not an
+    error by default -- but it is never silent either. The published table
+    includes these arms, and a run that quietly omitted them would look like
+    the published run while measuring something smaller.
     """
+    name, text_cls, narrative_cls = spec
     if mode == "skip":
         return []
 
-    from .eval.presidio_baseline import presidio_available
+    module = import_module(f"deidbench.eval.{name}_baseline")
 
-    if not presidio_available():
-        from .eval.presidio_baseline import _IMPORT_HINT
-
+    if not getattr(module, f"{name}_available")():
         if mode == "require":
-            print(_IMPORT_HINT, file=sys.stderr)
+            print(module._IMPORT_HINT, file=sys.stderr)
             raise SystemExit(
-                "--presidio was requested but Presidio is not importable"
+                f"--{name} was requested but {name} is not importable"
             )
         print(
-            "note: Presidio is not installed, so the two Presidio baseline arms\n"
-            "were skipped. The published table includes them; this run is the\n"
-            "three-arm subset. To match the published figures:\n"
-            f"{_IMPORT_HINT}",
+            f"note: {name} is not installed, so its two baseline arms were\n"
+            "skipped. The published table includes them; this run is a subset.\n"
+            "To match the published figures:\n"
+            f"{module._IMPORT_HINT}",
             file=sys.stderr,
         )
         return []
 
-    from .eval.presidio_baseline import (
-        PresidioNarrativeDetector,
-        PresidioTextDetector,
-    )
-
     return [
-        PresidioTextDetector(),
+        getattr(module, text_cls)(),
         SchemaConditionedDetector(
-            narrative_detector=PresidioNarrativeDetector(), policy=policy
+            narrative_detector=getattr(module, narrative_cls)(), policy=policy
         ),
     ]
 

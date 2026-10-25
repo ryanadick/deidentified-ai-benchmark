@@ -24,50 +24,59 @@ It measures detection and reports the result.
 500 messages, 25,585 annotated PHI spans, seed `20261013`. Reproduce with the
 commands below; the committed runs are in [`results/`](results/).
 
-| detector arm | recall | precision | structured | narrative | known Z-seg | unseen Z-seg | misused |
+| detector arm | recall | precision | typed recall | structured | narrative | known Z-seg | unseen Z-seg |
 |---|---|---|---|---|---|---|---|
-| rules-only | 0.825 | 1.000 | 1.000 | 0.000 | 0.80 | 0.00 | 0.596 |
-| text-only, ours (flattened) | 0.451 | 0.919 | 0.389 | 0.662 | 0.55 | 0.94 | 1.000 |
-| **Presidio** (flattened) | 0.506 | 0.841 | 0.460 | 0.717 | 0.55 | 0.71 | 0.585 |
-| schema-conditioned + regex narrative | 0.919 | 0.980 | 1.000 | 0.662 | 0.80 | 0.00 | 0.596 |
-| **schema-conditioned + Presidio narrative** | 0.932 | 0.977 | 1.000 | 0.755 | 0.80 | 0.00 | 0.596 |
+| rules-only | 0.825 | 1.000 | 0.801 | 1.000 | 0.000 | 0.80 | 0.00 |
+| text-only, ours (flattened) | 0.451 | 0.919 | 0.308 | 0.389 | 0.662 | 0.55 | 0.94 |
+| **Presidio** (flattened) | 0.506 | 0.841 | 0.143 | 0.460 | 0.717 | 0.55 | 0.71 |
+| **Philter** (flattened) | 0.738 | 0.879 | 0.000 | 0.731 | 0.785 | 0.75 | 0.69 |
+| schema-conditioned + regex narrative | 0.919 | 0.980 | 0.859 | 1.000 | 0.662 | 0.80 | 0.00 |
+| schema-conditioned + Presidio narrative | 0.932 | 0.977 | 0.845 | 1.000 | 0.755 | 0.80 | 0.00 |
+| **schema-conditioned + Philter narrative** | **0.936** | 0.977 | 0.801 | 1.000 | 0.779 | 0.80 | 0.00 |
 
-The point of the table is the **inversion**. Path-based rules are perfect on the
-fields they were written for and score zero on narrative, because no path-based
-rule finds a name someone typed into `OBX-5`. A detector that flattens the
-message to a string is the mirror image: it finds names in prose and misses them
-in `Vanbrugh^Bartram`, because a caret is not a linguistic cue. Neither approach
-alone is sufficient, and the gap between `ZPD` (0.80, a Z-segment the shipped
-policy describes) and `ZIN` (0.00, one it has never seen) measures how much of
-the non-standard problem is solved only by having already read the feed.
+Path-based rules are perfect on the fields they were written for and score zero
+on narrative, because no path-based rule finds a name someone typed into `OBX-5`.
+The gap between `ZPD` (0.80, a Z-segment the shipped policy describes) and `ZIN`
+(0.00, one it has never seen) measures how much of the non-standard problem is
+solved only by having already read the feed.
 
-**The inversion is not an artifact of a home-made opponent.** Microsoft Presidio
-— a published, widely cited tool — is run here out of the box, and it reproduces
-the text-only failure pattern: 0.460 on structured fields against 0.717 on
-narrative. Flattening HL7 and handing it to a free-text de-identifier is a
-measured 0.506, not an assumption.
+**The mirror-image failure is real, but it belongs to NER, not to text-only
+detection as such.** Presidio reproduces it exactly: 0.460 on structured fields
+against 0.717 on narrative. It finds names in prose and misses them in
+`Vanbrugh^Bartram`, because a caret is not a linguistic cue.
 
-Running Presidio also audits the stand-in it replaced, and the stand-in comes out
-*mildly pessimistic on recall and flattering on precision*: 0.451 against
-Presidio's 0.506, with precision 0.919 against 0.841. So the hand-written arm was
-a somewhat weak opponent on the metric that matters most — worth knowing, and the
-reason this was measured rather than argued — but it was not a straw man, and no
-conclusion in the table rests on it.
+**Philter does not, and that is the most useful thing in this table.** It scores
+0.731 on structured fields — nearly as high as on narrative — because it is not
+looking for PHI at all. Philter keeps only what its filter set confirms is
+*safe* and redacts everything else, so caret-delimited name components fall to it
+without any linguistic signal. At 0.738 overall it is far stronger than Presidio
+(0.506) and than our own stand-in (0.451).
 
-The strongest row is the last one, because it puts the **same published tool on
-both sides** of the architectural comparison. Presidio flattened scores 0.506;
-Presidio behind schema conditioning, seeing only the locations the policy defers,
-scores 0.932 — and gains on narrative specifically (0.717 → 0.755), where the
-coded fields that generate most of its false positives are no longer in front of
-it. Holding the detector fixed and changing only the architecture is worth 0.43
-recall, which is the claim this repository exists to test.
+So the blanket claim that free-text tools fail on structured HL7 is **too broad,
+and this benchmark now corrects it.** It holds for NER-based detection. It does
+not hold for whitelist-based redaction. That distinction only became visible by
+running a second published tool, which is the argument for not stopping at one.
 
-One caveat travels with the Presidio rows and is marked in every report: its
-**typed** scores (0.163 typed recall) are a floor, not a measurement. Presidio
-has one `PERSON` category where the ground truth distinguishes six kinds of name,
-and one `DATE_TIME` where the corpus separates birth from event dates, so typed
-scoring charges it for a distinction it was never built to draw. Read its untyped
-column as the comparable number.
+Philter's cost shows up in the three columns next to its recall. It has the
+highest false-positive count of any arm (2,788), and its **typed recall is
+0.000** — not a mapping artifact but a structural fact: Philter labels almost
+everything it removes `OTHER`, because it knows a span is unsafe without
+claiming to know what it is. A tool that cannot say *what* it removed cannot
+drive format-preserving surrogate replacement, which is the question the typed
+column asks. For redaction Philter is excellent; for reversible
+de-identification it is not a candidate, whatever its recall.
+
+Note also what the `chars x` column rules out: at 0.9, Philter is **not** buying
+that recall by flagging everything. The obvious explanation for an aggressive
+redactor scoring well is over-flagging, and the guard says no.
+
+The architecture still wins, and now with a published tool on **both sides** of
+the comparison. Philter flattened scores 0.738; Philter behind schema
+conditioning scores 0.936, the best arm in the table. Holding the detector fixed
+and changing only the architecture is worth **+0.198 recall** against Philter and
++0.426 against Presidio. The honest summary is that the architectural gain is
+real and robust across two independent tools, and considerably smaller than the
+Presidio-only figure suggested.
 
 ## Install and reproduce
 
@@ -79,25 +88,28 @@ pip install -e ".[dev]"
 deidbench corpus --out corpus.jsonl --messages 500 --seed 20261013
 deidbench evaluate corpus.jsonl --json results.json
 
-pytest            # 95 tests; the Presidio ones skip without the extra
+pytest            # 113 tests; baseline tests skip without their extras
 ```
 
-To reproduce the **Presidio** rows as well, install the optional baseline extra
-and its language model, then ask for the arms explicitly:
+To reproduce the **published-baseline** rows as well, install the optional
+extras and their data files, then ask for the arms explicitly:
 
 ```bash
-pip install -e ".[dev,presidio]"
+pip install -e ".[dev,presidio,philter]"
 python -m spacy download en_core_web_lg
+python -m nltk.downloader averaged_perceptron_tagger \
+    averaged_perceptron_tagger_eng punkt punkt_tab
 
-deidbench evaluate corpus.jsonl --presidio --json results.json
+deidbench evaluate corpus.jsonl --presidio --philter --json results.json
 ```
 
-`--presidio` fails loudly if Presidio is missing, which is what a reproduction
-wants. Without the flag the Presidio arms are included when importable and
-skipped with a note on stderr when not, so a three-arm run can never be mistaken
-for the full published table. `--no-presidio` runs the three-arm subset.
+`--presidio` and `--philter` fail loudly if the tool is missing, which is what a
+reproduction wants. Without the flags each baseline's arms are included when
+importable and skipped with a note on stderr when not, so a partial run can
+never be mistaken for the full published table. `--no-presidio` and
+`--no-philter` drop them.
 
-Two notes on that extra, both of which cost time to rediscover:
+Three notes on those extras, all of which cost time to rediscover:
 
 - **Python 3.12, not 3.13.** The pinned spaCy stack has no 3.13 wheels. The
   package declares 3.12 and is tested there.
@@ -106,10 +118,28 @@ Two notes on that extra, both of which cost time to rediscover:
   `OverflowError` inside the tokenizer when loading *any* model, so the detector
   cannot run at all, and numpy 2 breaks the matching `thinc` build. The extra
   pins the combination that actually loads `en_core_web_lg`.
+- **The Philter arm is `philter-lite`, not `philter-ucsf`.** This is forced, not
+  preferred. 324 of the 617 regex filter files in UCSF's published
+  `philter_delta` set place an inline `(?i)` flag mid-pattern, which Python has
+  rejected as an error since 3.11 — the published distribution cannot run on any
+  Python this package supports. `philter-lite` is a BSD fork carrying the same
+  filter set with the flag moved to the front, which is semantics-preserving
+  (an inline global flag always applied to the whole pattern; the misleading
+  position is *why* it became an error). See the caveat below for how that claim
+  is verified rather than asserted.
 
 The same seed regenerates the corpus byte for byte. That is the property the
 whole repository exists to provide: a number nobody else can regenerate is an
 assertion, not a result.
+
+The baseline arms hold that property too, and it took work. Presidio can return
+one span under two entity types with equal confidence, and which one survived
+depended on the order it emitted them — an order that varies between processes
+with Python's hash randomization. Untyped scores were unaffected, but Presidio's
+*typed* score drifted by around 13 spans per 500 messages from run to run.
+`stable_span_order` in `eval/detectors.py` imposes a total order so ties resolve
+identically everywhere. Verified by running the full evaluation under different
+`PYTHONHASHSEED` values and diffing: every score in every arm matches.
 
 ## What the corpus contains
 
@@ -155,7 +185,7 @@ sits between 0.6 and 1.0, so none of these figures are bought by over-flagging �
 but that is now a measured fact in the report rather than an assumption, and a
 future arm that games the rules will show it in that column.
 
-## Six caveats that bound what these numbers can be used for
+## Seven caveats that bound what these numbers can be used for
 
 These travel with the numbers. The last one is printed at the bottom of every
 report so it cannot be separated from the figures.
@@ -165,39 +195,62 @@ report so it cannot be separated from the figures.
    against the fields they were authored against. The `misused` and `ZIN`
    categories exist to approximate what production does instead, and rules score
    0.596 and 0.000 there.
-2. **`text-only` is our own detector; `presidio-text` is the published one.** The
-   `text-only` arm is a regex-and-heuristic detector we wrote, kept because it is
-   the arm behind the originally published figures and because its rules can be
-   read in `eval/detectors.py` where a statistical model can only be run. Its
-   **0.451 is not Presidio's score and must never be reported as one** — Presidio
-   has its own row. Philter and NLM Scrubber are still to come, so the set of
-   published comparators here is one tool, not the field.
-3. **Neither narrative detector is the intended model.** `RegexNarrativeDetector`
-   is a placeholder that establishes a floor. Presidio in the narrative seam is a
-   real statistical model and the best arm in the table, but it is a general-
-   purpose NER model, not the local open-weight clinical model the Phase I
-   hypothesis is about — and it gets no structural context, because Presidio has
-   no interface to accept any. `schema+presidio-narrative` is therefore the floor
-   that model has to beat, not a result about it. `NarrativeDetector` is the seam;
+2. **`text-only` is our own detector; `presidio-text` and `philter-text` are the
+   published ones.** The `text-only` arm is a regex-and-heuristic detector we
+   wrote, kept because it is the arm behind the originally published figures and
+   because its rules can be read in `eval/detectors.py` where a statistical model
+   can only be run. Its **0.451 is not any named tool's score and must never be
+   reported as one** — each tool has its own row. Measured against the published
+   pair, our stand-in was a weak opponent: 0.451 against Presidio's 0.506 and
+   Philter's 0.738. NLM Scrubber is still to come, so this is two tools, not the
+   field.
+3. **None of the narrative detectors is the intended model.**
+   `RegexNarrativeDetector` is a placeholder that establishes a floor. Presidio
+   and Philter in the narrative seam are real published tools and the two best
+   arms in the table, but neither is the local open-weight clinical model the
+   Phase I hypothesis is about, and neither receives any structural context —
+   because neither has an interface to accept it, and prepending context to the
+   value would shift every offset and make it a tool we modified rather than the
+   tool other people run. So the schema-conditioned baseline arms measure *the
+   architecture's floor*, with a general-purpose detector in the seam, and that
+   floor (0.936) is what the model has to beat. `NarrativeDetector` is the seam;
    swapping it changes one constructor argument. The architecture is the claim
    here, not the detector.
-4. **Presidio's typed scores are a floor, and its entity mapping is lossy.**
-   Presidio's vocabulary is coarser than this corpus's ground truth — one `PERSON`
-   for six kinds of name, one `DATE_TIME` for birth and event dates — so typed
-   scoring charges it for distinctions it was never built to draw. It is run in
-   its **default** configuration: default recognizers, no score threshold, no
-   HL7-specific tuning, no deny-lists. A baseline we tuned ourselves would have
-   the same credibility problem as one we wrote ourselves, but the untuned
-   configuration is a floor for Presidio too, and the mapping in
-   `eval/presidio_baseline.py` is the first thing to challenge. Entity types with
-   no counterpart in the corpus vocabulary are reported under an `unmapped:`
-   prefix rather than dropped, so they still cost precision.
-5. **Bare honorifics are not annotated as PHI.** `Mr`/`Dr` is placed in `PID-5.5`
+4. **The published baselines' typed scores are floors, and their type mappings
+   are lossy.** Both tools have a coarser vocabulary than this corpus's ground
+   truth. Presidio has one `PERSON` for six kinds of name and one `DATE_TIME` for
+   birth and event dates. Philter is more extreme: it labels almost everything
+   `OTHER`, which has no honest counterpart here, so its typed score is 0.000.
+   Unmapped categories are reported under an `unmapped:` prefix rather than
+   dropped, so they still cost precision — and we deliberately do **not** treat
+   Philter's `OTHER` as a wildcard matching any gold type, which would
+   manufacture typed accuracy it never demonstrated. Read the untyped column as
+   the comparable number for both. Both run in their **default** configuration:
+   stock recognizers and the published `philter_delta` filter set, no score
+   threshold, no HL7-specific tuning, no deny-lists. A baseline we tuned would
+   have the same credibility problem as one we wrote — but untuned is also a
+   floor for them, and the mappings in `eval/presidio_baseline.py` and
+   `eval/philter_baseline.py` are the first thing to challenge.
+5. **The Philter arm is a port, not the distribution UCSF ships.** It runs
+   `philter-lite`, a BSD fork, because 324 of the 617 regex filter files in the
+   published `philter_delta` set place an inline `(?i)` flag mid-pattern, which
+   Python has rejected as an error since 3.11 — `philter-ucsf` cannot run on any
+   Python this package supports. Rather than assert the fork is faithful, we
+   checked: of 308 comparable regex patterns, **306 are byte-identical to the
+   published files or differ only by relocating `(?i)` to the front** (which is
+   semantics-preserving, since an inline global flag always applied to the whole
+   pattern). `tests/test_philter_baseline.py` pins a sample verbatim, including
+   an upstream typo the fork preserves — a transcription fingerprint, since a
+   rewrite would have fixed it. The two genuine divergences are both fork
+   bug-fixes in *whitelist* filters, so the fork treats marginally more text as
+   safe and if anything under-redacts relative to published Philter. Report this
+   row as "Philter (philter-lite port)".
+6. **Bare honorifics are not annotated as PHI.** `Mr`/`Dr` is placed in `PID-5.5`
    but not treated as ground truth: a title from a closed set of five values is
    not a name, so HIPAA's "Names" identifier does not reach it. Annotating it
    charged every arm a miss for correctly leaving it alone, and buried the 171 real
    field-misuse cases under 400 artifacts.
-6. **Planted-PHI corpora measure what you planted.** These numbers are a floor and
+7. **Planted-PHI corpora measure what you planted.** These numbers are a floor and
    a methodology demonstration. They are not a substitute for measurement on
    production messages, and nothing written up from them should imply otherwise.
 
@@ -205,7 +258,7 @@ report so it cannot be separated from the figures.
 
 This repository is the measurement half of a larger system. The published part is
 everything needed to regenerate the corpus and reproduce the figures above:
-the HL7 v2 parser, the corpus generator, the HL7 v2 policy, the five detector
+the HL7 v2 parser, the corpus generator, the HL7 v2 policy, the seven detector
 arms and the scoring harness.
 
 Not published, because none of it is needed to check a number: surrogate

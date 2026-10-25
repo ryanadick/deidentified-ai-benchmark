@@ -152,10 +152,13 @@ def test_regex_arm_provenance_is_empty() -> None:
 # -- arm selection --------------------------------------------------------
 
 
-def test_no_presidio_runs_the_three_arm_subset() -> None:
-    from deidbench.cli import _presidio_detectors
+PRESIDIO_SPEC = ("presidio", "PresidioTextDetector", "PresidioNarrativeDetector")
 
-    assert _presidio_detectors("skip", None) == []
+
+def test_no_presidio_runs_the_three_arm_subset() -> None:
+    from deidbench.cli import _baseline_detectors
+
+    assert _baseline_detectors(PRESIDIO_SPEC, "skip", None) == []
 
 
 def test_missing_presidio_is_a_note_in_auto_and_an_error_when_required(
@@ -163,23 +166,37 @@ def test_missing_presidio_is_a_note_in_auto_and_an_error_when_required(
 ) -> None:
     """A run that quietly dropped the baseline would look like the full table."""
     import deidbench.eval.presidio_baseline as baseline
-    from deidbench.cli import _presidio_detectors
+    from deidbench.cli import _baseline_detectors
 
     monkeypatch.setattr(baseline, "presidio_available", lambda: False)
 
-    assert _presidio_detectors("auto", None) == []
+    assert _baseline_detectors(PRESIDIO_SPEC, "auto", None) == []
     assert "skipped" in capsys.readouterr().err
 
     with pytest.raises(SystemExit):
-        _presidio_detectors("require", None)
+        _baseline_detectors(PRESIDIO_SPEC, "require", None)
 
 
 @requires_presidio
 def test_auto_adds_both_presidio_arms_when_available() -> None:
-    from deidbench.cli import _presidio_detectors
+    from deidbench.cli import _baseline_detectors
 
-    arms = _presidio_detectors("auto", None)
+    arms = _baseline_detectors(PRESIDIO_SPEC, "auto", None)
     assert [arm.name for arm in arms] == [
         "presidio-text",
         "schema+presidio-narrative",
     ]
+
+
+def test_every_baseline_arm_follows_the_module_contract() -> None:
+    """The table in cli.py is only safe if every row honours the convention."""
+    from importlib import import_module
+
+    from deidbench.cli import BASELINE_ARMS
+
+    for name, text_cls, narrative_cls in BASELINE_ARMS:
+        module = import_module(f"deidbench.eval.{name}_baseline")
+        assert callable(getattr(module, f"{name}_available"))
+        assert isinstance(module._IMPORT_HINT, str)
+        assert hasattr(module, text_cls)
+        assert hasattr(module, narrative_cls)
