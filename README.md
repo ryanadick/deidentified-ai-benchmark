@@ -1,6 +1,6 @@
 # deidbench: a reproducible PHI-detection benchmark for HL7 v2
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23623786.svg)](https://doi.org/10.5281/zenodo.23623786)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23623785.svg)](https://doi.org/10.5281/zenodo.23623785)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 
@@ -347,12 +347,25 @@ variants from production feeds that break the generator's assumptions.
 ## Citing this work
 
 > Dick, R. (2026). *deidbench: a reproducible PHI-detection benchmark for HL7 v2*.
-> Zenodo. https://doi.org/10.5281/zenodo.23623786
+> Zenodo. https://doi.org/10.5281/zenodo.23623785
 
-That DOI always resolves to the latest version. If you are reporting a number,
-cite the **version** DOI of the release you actually ran — each release has its
-own — so the figure and the code that produced it stay attached. Machine-readable
-metadata is in [`CITATION.cff`](CITATION.cff).
+**Cite `10.5281/zenodo.23623785` for the project. Cite a version DOI beside a
+specific figure.**
+
+Those are two different DOIs and it is easy to get backwards, because Zenodo
+mints them together and the concept DOI is the *lower* number:
+
+| DOI | what it is |
+|---|---|
+| `10.5281/zenodo.23623785` | **concept DOI** — the project; resolves to the latest version |
+| `10.5281/zenodo.23623786` | **version DOI** — frozen to v0.1.0 forever |
+
+So quote the concept DOI when you mean the benchmark, and the version DOI of the
+release you actually ran when you are reporting a number — that keeps the figure
+attached to the code that produced it. Citing a version DOI as though it were the
+project pins every reader to one release, including readers who wanted the
+comparison a later release added. Machine-readable metadata, carrying both, is in
+[`CITATION.cff`](CITATION.cff).
 
 Please quote the caveats with the numbers.
 

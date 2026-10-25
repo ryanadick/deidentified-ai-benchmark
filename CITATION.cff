@@ -12,9 +12,16 @@ repository-code: "https://github.com/ryanadick/deidentified-ai-benchmark"
 license: MIT
 version: 0.1.0
 identifiers:
+  # Two DOIs, and the distinction matters. Zenodo mints a concept DOI for the
+  # record series and a separate version DOI for each release; the concept DOI
+  # is the lower number. Citing a version DOI as though it were the project
+  # pins every reader to one release forever.
+  - type: doi
+    value: "10.5281/zenodo.23623785"
+    description: "Concept DOI for the project — resolves to the latest version"
   - type: doi
     value: "10.5281/zenodo.23623786"
-    description: "Concept DOI — always resolves to the latest version"
+    description: "Version DOI for v0.1.0 — frozen to that release"
 abstract: >-
   A reproducible benchmark for protected health information (PHI) detection in
   HL7 v2 messages. Existing de-identification tools and evaluations target
