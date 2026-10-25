@@ -92,9 +92,12 @@ def _cmd_corpus(args) -> int:
     if args.messages_dir:
         args.messages_dir.mkdir(parents=True, exist_ok=True)
         for message in corpus.messages:
-            (args.messages_dir / f"{message.message_id}.hl7").write_text(
-                message.text, encoding="utf-8", newline=""
-            )
+            # newline="" so the terminators the generator chose survive the
+            # write. open() rather than Path.write_text(), whose newline
+            # argument is Python 3.13+ only.
+            path = args.messages_dir / f"{message.message_id}.hl7"
+            with open(path, "w", encoding="utf-8", newline="") as handle:
+                handle.write(message.text)
 
     print(json.dumps(corpus.summary(), indent=2))
     print(f"wrote {len(corpus)} messages to {args.out}", file=sys.stderr)

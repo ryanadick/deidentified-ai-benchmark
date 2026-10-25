@@ -18,7 +18,12 @@ SAMPLES = sorted((pathlib.Path(__file__).parent.parent / "samples").glob("*.hl7"
 
 
 def read_sample(path: pathlib.Path) -> str:
-    return path.read_text(encoding="utf-8", newline="")
+    # newline="" to keep CR and CRLF terminators exactly as written, which is
+    # the property these tests exist to check. Passed to open() rather than
+    # Path.read_text(), whose newline argument is Python 3.13+ only -- this
+    # package supports 3.12.
+    with open(path, encoding="utf-8", newline="") as handle:
+        return handle.read()
 
 
 @pytest.mark.parametrize("sample", SAMPLES, ids=lambda p: p.name)

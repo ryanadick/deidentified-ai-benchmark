@@ -16,16 +16,23 @@ from deidbench.hl7.spans import candidate_policy_paths, serialize_with_spans
 SAMPLES = sorted((pathlib.Path(__file__).parent.parent / "samples").glob("*.hl7"))
 
 
+def read_sample(path) -> str:
+    # newline="" preserves CR/CRLF terminators exactly; open() rather than
+    # Path.read_text(), whose newline argument is Python 3.13+ only.
+    with open(path, encoding="utf-8", newline="") as handle:
+        return handle.read()
+
+
 @pytest.mark.parametrize("sample", SAMPLES, ids=lambda p: p.name)
 def test_span_walk_reproduces_the_message(sample) -> None:
-    text = sample.read_text(encoding="utf-8", newline="")
+    text = read_sample(sample)
     rebuilt, _ = serialize_with_spans(hl7.parse(text))
     assert rebuilt == text
 
 
 @pytest.mark.parametrize("sample", SAMPLES, ids=lambda p: p.name)
 def test_every_span_points_at_its_own_text(sample) -> None:
-    text = sample.read_text(encoding="utf-8", newline="")
+    text = read_sample(sample)
     rebuilt, spans = serialize_with_spans(hl7.parse(text))
     for span in spans:
         assert rebuilt[span.start : span.end] == span.text, span.path
