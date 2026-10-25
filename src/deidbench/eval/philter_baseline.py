@@ -87,12 +87,31 @@ class PhilterUnavailable(RuntimeError):
     """Philter, or the NLTK data it needs, is not importable."""
 
 
+#: NLTK data Philter needs at runtime. Its part-of-speech filter calls
+#: ``nltk.pos_tag``, which fails on a bare install with a LookupError rather
+#: than anything that looks like a missing dependency.
+REQUIRED_NLTK_DATA = ("taggers/averaged_perceptron_tagger",)
+
+
 def philter_available() -> bool:
-    """Whether the Philter arms can run in this environment."""
+    """Whether the Philter arms can run in this environment.
+
+    Checks the NLTK tagger data as well as the package, for the same reason
+    the Presidio check loads more than an import: ``philter_lite`` imports
+    cleanly without its data and then fails partway through a run, which would
+    make the test suite error instead of skipping.
+    """
     try:
+        import nltk
         import philter_lite  # noqa: F401
     except ImportError:
         return False
+
+    for resource in REQUIRED_NLTK_DATA:
+        try:
+            nltk.data.find(resource)
+        except LookupError:
+            return False
     return True
 
 

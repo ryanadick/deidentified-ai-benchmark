@@ -116,7 +116,12 @@ extras and their data files, then ask for the arms explicitly:
 
 ```bash
 pip install -e ".[dev,presidio,philter]"
-python -m spacy download en_core_web_lg
+
+# spaCy model, pinned to the build that matches the pinned spaCy. Install it by
+# URL rather than with `spacy download`: that command shells out to pip (absent
+# in a uv-created venv) and resolves a model version that may not match.
+pip install https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-3.7.1/en_core_web_lg-3.7.1-py3-none-any.whl
+
 python -m nltk.downloader averaged_perceptron_tagger \
     averaged_perceptron_tagger_eng punkt punkt_tab
 

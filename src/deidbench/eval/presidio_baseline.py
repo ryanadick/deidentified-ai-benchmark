@@ -69,6 +69,7 @@ column, where the flattened Presidio arm is the only one with a non-zero count.
 from __future__ import annotations
 
 import functools
+import importlib.util
 from dataclasses import dataclass
 
 from ..surrogate.types import PhiType
@@ -108,11 +109,20 @@ PRESIDIO_ENTITY_MAP: dict[str, str] = {
     "AGE": str(PhiType.IDENTIFIER),
 }
 
+#: Shown when the arm is skipped. The model is installed by URL rather than
+#: with ``spacy download`` because that command shells out to pip, which a
+#: uv-created venv does not have, and resolves a model version that need not
+#: match the pinned spaCy.
+SPACY_MODEL_WHEEL = (
+    "https://github.com/explosion/spacy-models/releases/download/"
+    "en_core_web_lg-3.7.1/en_core_web_lg-3.7.1-py3-none-any.whl"
+)
+
 _IMPORT_HINT = (
-    "Presidio is not installed. Install the optional baseline extra and its "
-    "language model:\n"
+    "Presidio, or its language model, is not available. Install the optional "
+    "baseline extra and the model:\n"
     '    pip install -e ".[presidio]"\n'
-    f"    python -m spacy download {DEFAULT_SPACY_MODEL}"
+    f"    pip install {SPACY_MODEL_WHEEL}"
 )
 
 
@@ -120,13 +130,21 @@ class PresidioUnavailable(RuntimeError):
     """Presidio, or its language model, is not importable."""
 
 
-def presidio_available() -> bool:
-    """Whether the Presidio arms can run in this environment."""
+def presidio_available(spacy_model: str = DEFAULT_SPACY_MODEL) -> bool:
+    """Whether the Presidio arms can run in this environment.
+
+    Checks the language model as well as the package. Presidio imports fine
+    without a model and then fails when the engine is built, which turns a
+    missing optional dependency into a crash mid-run and makes the test suite
+    error instead of skipping. The model is checked by package presence rather
+    than by loading it, because loading costs seconds and this is called during
+    test collection.
+    """
     try:
         import presidio_analyzer  # noqa: F401
     except ImportError:
         return False
-    return True
+    return importlib.util.find_spec(spacy_model) is not None
 
 
 def map_entity_type(entity_type: str) -> str:
