@@ -91,6 +91,36 @@ def test_flagged_ratio_is_zero_with_no_ground_truth() -> None:
     assert score_message([], []).untyped.flagged_ratio == 0.0
 
 
+# -- determinism of tie-breaking ----------------------------------------
+
+
+def test_identical_spans_with_different_types_resolve_the_same_way() -> None:
+    """The reproducibility bug this guards against was real, not theoretical.
+
+    A third-party tool can report one span under two equally confident types.
+    Overlap resolution then keeps whichever arrived first, so the typed score
+    moved between processes as hash randomization reordered the tool's output.
+    Ordering on the type as well makes the outcome independent of arrival order.
+    """
+    from deidbench.eval.detectors import stable_span_order
+
+    arrivals = [
+        [(10, 18, "account_number"), (10, 18, "license_number")],
+        [(10, 18, "license_number"), (10, 18, "account_number")],
+    ]
+    resolved = {
+        tuple(_resolve_overlaps_types(stable_span_order(order))) for order in arrivals
+    }
+    assert len(resolved) == 1, "tie broken differently depending on input order"
+
+
+def _resolve_overlaps_types(spans: list[tuple[int, int, str]]) -> list[str]:
+    kept = _resolve_overlaps(
+        [Detection(start=s, end=e, text="x", phi_type=t) for s, e, t in spans]
+    )
+    return [d.phi_type for d in kept]
+
+
 def test_partial_coverage_is_not_a_true_positive() -> None:
     """A detector that finds "brugh" inside "Vanbrugh" has left PHI in the output.
 

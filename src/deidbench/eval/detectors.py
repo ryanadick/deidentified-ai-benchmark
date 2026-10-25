@@ -515,6 +515,27 @@ def _rule_for(span: LeafSpan, index: dict[str, Rule]) -> Rule | None:
     return None
 
 
+def stable_span_order(
+    spans: list[tuple[int, int, str]],
+) -> list[tuple[int, int, str]]:
+    """Put raw ``(start, end, phi_type)`` spans into a total order.
+
+    Needed because ``_resolve_overlaps`` breaks ties by input order, and a
+    third-party tool can return *the same span under two different types with
+    the same confidence* -- a number that is equally a bank account and a
+    driver's licence. Which type survives then depends on the order the tool
+    happened to emit them in, and for Presidio that order varies between
+    processes with Python's hash randomization. The untyped score is unaffected
+    (the span is identical either way) but the typed score drifts, which is
+    exactly the kind of irreproducibility this benchmark exists not to have.
+
+    Sorting on all three fields makes the order total, so ties resolve the same
+    way in every process. Choosing the alphabetically first type among equals
+    is arbitrary; being arbitrary *and identical every run* is the point.
+    """
+    return sorted(spans, key=lambda span: (span[0], span[1], span[2]))
+
+
 def _resolve_overlaps(detections: list[Detection]) -> list[Detection]:
     """Keep the longest of any overlapping predictions.
 
