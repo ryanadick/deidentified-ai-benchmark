@@ -22,6 +22,28 @@ dependencies = [
 dev = [
     "pytest>=8.0",
 ]
+# Microsoft Presidio, the published text-only baseline. Optional because the
+# three core arms must run with PyYAML alone, and because this extra pulls in
+# spaCy and a ~600MB language model.
+#
+# The upper bounds are not caution, they are a working set. spaCy 3.8 with the
+# current murmurhash/preshed/cymem wheels raises OverflowError inside the
+# tokenizer on import of any model, so the detector cannot run at all; numpy 2
+# breaks the matching thinc build. These pins are the combination verified to
+# load en_core_web_lg and produce the committed Presidio figures. The model
+# itself is not installable from PyPI -- see the README for the one extra
+# command.
+presidio = [
+    "presidio-analyzer>=2.2,<3.0",
+    "spacy==3.7.5",
+    "thinc==8.2.5",
+    "numpy==1.26.4",
+    "murmurhash==1.0.10",
+    "preshed==3.0.9",
+    "cymem==2.0.8",
+    "blis==0.7.11",
+    "srsly==2.4.8",
+]
 
 [project.urls]
 Homepage = "https://github.com/ryanadick/deidentified-ai-benchmark"

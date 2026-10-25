@@ -1,0 +1,97 @@
+CORPUS
+  500 messages, 25585 annotated PHI spans
+  structured=20145  narrative=3653  nonstandard=1616  misused=171
+
+OVERALL (untyped: would this have been removed?)
+  detector                    recall    prec      F1  missed  partial      FP  chars x       ms
+  rules-only                   0.825   1.000   0.904    4490        0       0      0.8      664
+  text-only                    0.451   0.919   0.605   14045        0     975      0.6      293
+  schema+regex-narrative       0.919   0.980   0.948    2071        0     475      0.9      756
+  presidio-text                0.506   0.841   0.632   12631     1808    1902      0.8    16457
+  schema+presidio-narrative    0.932   0.977   0.954    1731      125     548      1.0    10715
+  'chars x' is characters flagged per character of real PHI. A span
+  that swallows a whole segment covers every gold span inside it, so
+  it earns recall and precision at once; a ratio far above 1.0 means
+  that arm's rates are upper bounds, not clean detections.
+
+TYPED (would it have been replaced with the right kind of surrogate?)
+  detector                    recall    prec      F1
+  rules-only                   0.801   0.971   0.878
+  text-only                    0.308   0.656   0.419
+  schema+regex-narrative       0.859   0.935   0.895
+  presidio-text                0.163   0.348   0.222
+  schema+presidio-narrative    0.847   0.908   0.876
+
+RECALL BY LOCATION CLASS
+  detector                      structured     narrative   nonstandard       misused
+  rules-only                    1.000         0.000         0.525         0.596     
+  text-only                     0.389         0.662         0.684         1.000     
+  schema+regex-narrative        1.000         0.662         0.525         0.596     
+  presidio-text                 0.460         0.717         0.601         0.585     
+  schema+presidio-narrative     1.000         0.755         0.525         0.596     
+
+RECALL BY SEGMENT
+  detector                       ZIN     ZPD     AL1     DG1     EVN     MSH     NK1     NTE     OBX     PID     PV1
+  rules-only                    0.00    0.80    0.00    0.00    1.00    1.00    1.00    0.00    0.00    1.00    0.99
+  text-only                     0.94    0.55    0.24    0.59    0.00    0.00    0.39    0.58    0.78    0.52    0.21
+  schema+regex-narrative        0.00    0.80    0.24    0.45    1.00    1.00    1.00    0.58    0.78    1.00    0.99
+  presidio-text                 0.71    0.55    0.89    0.65    0.60    1.00    0.30    0.63    0.74    0.41    0.72
+  schema+presidio-narrative     0.00    0.80    0.95    0.68    1.00    1.00    1.00    0.66    0.78    1.00    0.99
+  ZPD is a Z-segment the shipped policy describes; ZIN is one it has
+  never seen. The gap between them is how much of the non-standard
+  problem is solved only by having read the feed first.
+
+WORST PHI TYPES BY RECALL
+  rules-only
+    name_freeform            recall 0.437  (212/485)
+    given_name               recall 0.549  (1000/1820)
+    birth_date               recall 0.579  (500/864)
+    family_name              recall 0.582  (1000/1718)
+    street_address           recall 0.756  (1000/1323)
+    phone                    recall 0.808  (2277/2818)
+  text-only
+    event_date               recall 0.000  (0/2500)
+    middle_name              recall 0.000  (0/500)
+    name_suffix              recall 0.000  (0/386)
+    address_other            recall 0.000  (0/839)
+    city                     recall 0.000  (0/1188)
+    state                    recall 0.000  (0/1629)
+  schema+regex-narrative
+    name_freeform            recall 0.530  (257/485)
+    birth_date               recall 0.594  (513/864)
+    given_name               recall 0.801  (1457/1820)
+    family_name              recall 0.832  (1429/1718)
+    city                     recall 0.842  (1000/1188)
+    medical_record_number    recall 0.885  (1272/1438)
+  presidio-text
+    address_other            recall 0.060  (50/839)
+    street_address           recall 0.060  (79/1323)
+    county                   recall 0.066  (33/500)
+    organization             recall 0.106  (81/765)
+    state                    recall 0.149  (243/1629)
+    middle_name              recall 0.156  (78/500)
+  schema+presidio-narrative
+    name_freeform            recall 0.563  (273/485)
+    birth_date               recall 0.594  (513/864)
+    street_address           recall 0.772  (1021/1323)
+    medical_record_number    recall 0.887  (1275/1438)
+    email                    recall 0.918  (502/547)
+    postal_code              recall 0.922  (1041/1129)
+
+TOP FALSE-POSITIVE CATEGORIES
+  rules-only: none
+  text-only: medical_record_number=500, birth_date=238, family_name=237
+  schema+regex-narrative: birth_date=238, family_name=237
+  presidio-text: event_date=790, license_number=695, organization=397, city=10, family_name=8
+  schema+presidio-narrative: event_date=364, organization=170, family_name=7, city=5, unmapped:NRP=2
+
+BASELINE PROVENANCE
+  presidio-text: configuration=default recognizers, no score threshold, presidio-analyzer=2.2.364, score_threshold=0.0, spacy=3.7.5, spacy_model=en_core_web_lg, spacy_model_version=3.7.1
+  schema+presidio-narrative: configuration=default recognizers, no score threshold, presidio-analyzer=2.2.364, score_threshold=0.0, spacy=3.7.5, spacy_model=en_core_web_lg, spacy_model_version=3.7.1
+  A third-party baseline's version is part of its score. Reporting
+  the number without it is not a reproducible comparison.
+
+Scoring: recall requires full coverage of a gold span (partial coverage
+still leaks PHI); precision credits any overlap; 'chars x' guards both
+against arms that score by over-flagging. Synthetic planted-PHI corpus
+-- a floor and a methodology demonstration, not production measurement.

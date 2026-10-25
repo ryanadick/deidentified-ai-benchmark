@@ -21,27 +21,57 @@ It measures detection and reports the result.
 
 ## The headline result
 
-500 messages, 25,585 annotated PHI spans, seed `20261013`. Reproduce with the two
-commands below; the committed run is in [`results/`](results/).
+500 messages, 25,585 annotated PHI spans, seed `20261013`. Reproduce with the
+commands below; the committed runs are in [`results/`](results/).
 
 | detector arm | recall | precision | structured | narrative | known Z-seg | unseen Z-seg | misused |
 |---|---|---|---|---|---|---|---|
 | rules-only | 0.825 | 1.000 | 1.000 | 0.000 | 0.80 | 0.00 | 0.596 |
-| text-only (flattened) | 0.451 | 0.919 | 0.389 | 0.662 | 0.55 | 0.94 | 1.000 |
+| text-only, ours (flattened) | 0.451 | 0.919 | 0.389 | 0.662 | 0.55 | 0.94 | 1.000 |
+| **Presidio** (flattened) | 0.506 | 0.841 | 0.460 | 0.717 | 0.55 | 0.71 | 0.585 |
 | schema-conditioned + regex narrative | 0.919 | 0.980 | 1.000 | 0.662 | 0.80 | 0.00 | 0.596 |
+| **schema-conditioned + Presidio narrative** | 0.932 | 0.977 | 1.000 | 0.755 | 0.80 | 0.00 | 0.596 |
 
 The point of the table is the **inversion**. Path-based rules are perfect on the
 fields they were written for and score zero on narrative, because no path-based
-rule finds a name someone typed into `OBX-5`. A text-only detector that flattens
-the message to a string is the mirror image: it finds names in prose and misses
-them in `Vanbrugh^Bartram`, because a caret is not a linguistic cue. Neither
-approach alone is sufficient, and the gap between `ZPD` (0.80, a Z-segment the
-shipped policy describes) and `ZIN` (0.00, one it has never seen) measures how
-much of the non-standard problem is solved only by having already read the feed.
+rule finds a name someone typed into `OBX-5`. A detector that flattens the
+message to a string is the mirror image: it finds names in prose and misses them
+in `Vanbrugh^Bartram`, because a caret is not a linguistic cue. Neither approach
+alone is sufficient, and the gap between `ZPD` (0.80, a Z-segment the shipped
+policy describes) and `ZIN` (0.00, one it has never seen) measures how much of
+the non-standard problem is solved only by having already read the feed.
+
+**The inversion is not an artifact of a home-made opponent.** Microsoft Presidio
+— a published, widely cited tool — is run here out of the box, and it reproduces
+the text-only failure pattern: 0.460 on structured fields against 0.717 on
+narrative. Flattening HL7 and handing it to a free-text de-identifier is a
+measured 0.506, not an assumption.
+
+Running Presidio also audits the stand-in it replaced, and the stand-in comes out
+*mildly pessimistic on recall and flattering on precision*: 0.451 against
+Presidio's 0.506, with precision 0.919 against 0.841. So the hand-written arm was
+a somewhat weak opponent on the metric that matters most — worth knowing, and the
+reason this was measured rather than argued — but it was not a straw man, and no
+conclusion in the table rests on it.
+
+The strongest row is the last one, because it puts the **same published tool on
+both sides** of the architectural comparison. Presidio flattened scores 0.506;
+Presidio behind schema conditioning, seeing only the locations the policy defers,
+scores 0.932 — and gains on narrative specifically (0.717 → 0.755), where the
+coded fields that generate most of its false positives are no longer in front of
+it. Holding the detector fixed and changing only the architecture is worth 0.43
+recall, which is the claim this repository exists to test.
+
+One caveat travels with the Presidio rows and is marked in every report: its
+**typed** scores (0.163 typed recall) are a floor, not a measurement. Presidio
+has one `PERSON` category where the ground truth distinguishes six kinds of name,
+and one `DATE_TIME` where the corpus separates birth from event dates, so typed
+scoring charges it for a distinction it was never built to draw. Read its untyped
+column as the comparable number.
 
 ## Install and reproduce
 
-Requires Python 3.12+. The only runtime dependency is PyYAML.
+Requires Python 3.12. The three core arms need only PyYAML.
 
 ```bash
 pip install -e ".[dev]"
@@ -49,8 +79,33 @@ pip install -e ".[dev]"
 deidbench corpus --out corpus.jsonl --messages 500 --seed 20261013
 deidbench evaluate corpus.jsonl --json results.json
 
-pytest            # 80 tests
+pytest            # 95 tests; the Presidio ones skip without the extra
 ```
+
+To reproduce the **Presidio** rows as well, install the optional baseline extra
+and its language model, then ask for the arms explicitly:
+
+```bash
+pip install -e ".[dev,presidio]"
+python -m spacy download en_core_web_lg
+
+deidbench evaluate corpus.jsonl --presidio --json results.json
+```
+
+`--presidio` fails loudly if Presidio is missing, which is what a reproduction
+wants. Without the flag the Presidio arms are included when importable and
+skipped with a note on stderr when not, so a three-arm run can never be mistaken
+for the full published table. `--no-presidio` runs the three-arm subset.
+
+Two notes on that extra, both of which cost time to rediscover:
+
+- **Python 3.12, not 3.13.** The pinned spaCy stack has no 3.13 wheels. The
+  package declares 3.12 and is tested there.
+- **The pins in `[presidio]` are a verified working set, not caution.** spaCy
+  3.8 against the current `murmurhash`/`preshed`/`cymem` wheels raises
+  `OverflowError` inside the tokenizer when loading *any* model, so the detector
+  cannot run at all, and numpy 2 breaks the matching `thinc` build. The extra
+  pins the combination that actually loads `en_core_web_lg`.
 
 The same seed regenerates the corpus byte for byte. That is the property the
 whole repository exists to provide: a number nobody else can regenerate is an
@@ -89,7 +144,18 @@ Strict where a mistake leaks, lenient where it only costs. The harness also
 reports a **typed** score, which asks the harder question: would this span have
 been replaced with the right *kind* of surrogate, not merely removed?
 
-## Five caveats that bound what these numbers can be used for
+Both rules share one exploit, so both are reported against a character count. A
+prediction that swallows an entire segment fully covers every gold span inside it
+*and* overlaps them, collecting recall and precision while flagging most of the
+message. This is not hypothetical — it is what a general-purpose NER model does
+to caret-delimited HL7, which has no sentence structure to work from. The
+`chars x` column is the guard: characters flagged per character of real PHI,
+where 1.0 is a detector flagging exactly the PHI. Every arm in the table above
+sits between 0.6 and 1.0, so none of these figures are bought by over-flagging —
+but that is now a measured fact in the report rather than an assumption, and a
+future arm that games the rules will show it in that column.
+
+## Six caveats that bound what these numbers can be used for
 
 These travel with the numbers. The last one is printed at the bottom of every
 report so it cannot be separated from the figures.
@@ -99,23 +165,39 @@ report so it cannot be separated from the figures.
    against the fields they were authored against. The `misused` and `ZIN`
    categories exist to approximate what production does instead, and rules score
    0.596 and 0.000 there.
-2. **The text-only arm is a stand-in, not a baseline.** Presidio, Philter and NLM
-   Scrubber are the comparators that belong in a paper. This is a transparent
-   regex-and-heuristic detector, written out in `eval/detectors.py` so the
-   comparison can be criticized. Its name heuristic — requiring a title cue or two
-   space-separated capitalized words — is the single assumption most worth
-   challenging. Do not describe the 0.451 as any named tool's score.
-3. **The third arm contains no model.** `RegexNarrativeDetector` is a placeholder
-   that proves the harness end to end and establishes the floor a local
-   open-weight model has to beat. `NarrativeDetector` is the seam it plugs into;
+2. **`text-only` is our own detector; `presidio-text` is the published one.** The
+   `text-only` arm is a regex-and-heuristic detector we wrote, kept because it is
+   the arm behind the originally published figures and because its rules can be
+   read in `eval/detectors.py` where a statistical model can only be run. Its
+   **0.451 is not Presidio's score and must never be reported as one** — Presidio
+   has its own row. Philter and NLM Scrubber are still to come, so the set of
+   published comparators here is one tool, not the field.
+3. **Neither narrative detector is the intended model.** `RegexNarrativeDetector`
+   is a placeholder that establishes a floor. Presidio in the narrative seam is a
+   real statistical model and the best arm in the table, but it is a general-
+   purpose NER model, not the local open-weight clinical model the Phase I
+   hypothesis is about — and it gets no structural context, because Presidio has
+   no interface to accept any. `schema+presidio-narrative` is therefore the floor
+   that model has to beat, not a result about it. `NarrativeDetector` is the seam;
    swapping it changes one constructor argument. The architecture is the claim
    here, not the detector.
-4. **Bare honorifics are not annotated as PHI.** `Mr`/`Dr` is placed in `PID-5.5`
+4. **Presidio's typed scores are a floor, and its entity mapping is lossy.**
+   Presidio's vocabulary is coarser than this corpus's ground truth — one `PERSON`
+   for six kinds of name, one `DATE_TIME` for birth and event dates — so typed
+   scoring charges it for distinctions it was never built to draw. It is run in
+   its **default** configuration: default recognizers, no score threshold, no
+   HL7-specific tuning, no deny-lists. A baseline we tuned ourselves would have
+   the same credibility problem as one we wrote ourselves, but the untuned
+   configuration is a floor for Presidio too, and the mapping in
+   `eval/presidio_baseline.py` is the first thing to challenge. Entity types with
+   no counterpart in the corpus vocabulary are reported under an `unmapped:`
+   prefix rather than dropped, so they still cost precision.
+5. **Bare honorifics are not annotated as PHI.** `Mr`/`Dr` is placed in `PID-5.5`
    but not treated as ground truth: a title from a closed set of five values is
    not a name, so HIPAA's "Names" identifier does not reach it. Annotating it
    charged every arm a miss for correctly leaving it alone, and buried the 171 real
    field-misuse cases under 400 artifacts.
-5. **Planted-PHI corpora measure what you planted.** These numbers are a floor and
+6. **Planted-PHI corpora measure what you planted.** These numbers are a floor and
    a methodology demonstration. They are not a substitute for measurement on
    production messages, and nothing written up from them should imply otherwise.
 
@@ -123,7 +205,7 @@ report so it cannot be separated from the figures.
 
 This repository is the measurement half of a larger system. The published part is
 everything needed to regenerate the corpus and reproduce the figures above:
-the HL7 v2 parser, the corpus generator, the HL7 v2 policy, the three detector
+the HL7 v2 parser, the corpus generator, the HL7 v2 policy, the five detector
 arms and the scoring harness.
 
 Not published, because none of it is needed to check a number: surrogate

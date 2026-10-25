@@ -1,6 +1,8 @@
 """The detector arms being compared.
 
-Three arms, matching the comparison the proposal commits to:
+The three arms that need no optional dependency, matching the comparison the
+proposal commits to. Two further arms live in :mod:`.presidio_baseline`, which
+puts a published tool on both sides of the architectural comparison:
 
 1. ``RulesOnlyDetector`` -- the policy, nothing else. Should be near-perfect on
    structured fields and score zero on narrative, by construction rather than
@@ -18,17 +20,27 @@ Three arms, matching the comparison the proposal commits to:
    with the structural context of each location available to it. This is the
    architecture the Phase I hypothesis is about.
 
-**On the text-only baseline.** Microsoft Presidio, Philter and NLM Scrubber are
-the comparators that belong in a paper, and this is not one of them. It is a
-transparent stand-in whose rules are written out below so the comparison can be
-read and criticized rather than taken on faith. Its name heuristic requires
-either a title cue or two space-separated capitalized words -- a deliberate,
-stated choice that models how NER behaves on flattened HL7, and the single
-assumption most worth challenging when the real baselines are wired in.
+**On ``FlattenedTextDetector``.** This arm is ours: we wrote the opponent it
+represents, which means its score cannot settle whether a *published* tool does
+better. Microsoft Presidio now runs as a real baseline in
+:mod:`.presidio_baseline`, and Philter and NLM Scrubber are next.
+
+This arm is kept rather than deleted, for two reasons. It is the detector
+behind the originally published figures, so removing it would make those
+numbers unreproducible. And it stays useful as a transparent reference: its
+rules are written out below and can be read and criticized, where a baseline
+with a statistical model inside it can only be run. Its name heuristic requires
+either a title cue or two space-separated capitalized words -- a stated choice
+about how name detection behaves on flattened HL7, and now a testable one,
+since Presidio's real NER is measured on the same corpus.
+
+Its score is **not** Presidio's score, and the two must never be reported
+interchangeably.
 
 ``NarrativeDetector`` is the seam the local open-weight model plugs into. The
-regex implementation here lets the harness produce complete three-arm numbers
-today; swapping in the model changes one constructor argument.
+regex implementation here lets the harness produce complete numbers without any
+optional dependency; swapping in Presidio, or the model, changes one
+constructor argument.
 """
 
 from __future__ import annotations
@@ -397,6 +409,16 @@ class SchemaConditionedDetector:
         self._index = _rule_index(self.policy)
         self.narrative_detector = narrative_detector or RegexNarrativeDetector()
         self.name = name or f"schema+{self.narrative_detector.name}"
+
+    @property
+    def provenance(self) -> dict:
+        """Forward the narrative detector's provenance, if it has any.
+
+        When the narrative seam holds a third-party tool, that tool's version
+        is what makes this arm's score reproducible; the wrapper itself has
+        nothing to declare.
+        """
+        return dict(getattr(self.narrative_detector, "provenance", {}) or {})
 
     def candidates(self, text: str) -> list[NarrativeCandidate]:
         """Locations the policy defers, with structural context attached."""

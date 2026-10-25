@@ -6,6 +6,11 @@
 Both are deterministic. The same seed produces the same corpus byte for byte,
 which is the whole point: a number nobody else can regenerate is an assertion,
 not a result.
+
+``evaluate`` runs three arms with no optional dependency, plus two Microsoft
+Presidio arms when Presidio is installed. ``--presidio`` makes those arms
+mandatory and fails loudly without them, which is what a reproduction of the
+published table wants; ``--no-presidio`` runs the three-arm subset.
 """
 
 from __future__ import annotations
@@ -77,7 +82,22 @@ def _build_parser() -> argparse.ArgumentParser:
         default=[],
         help="override the bundled policy; repeatable, merged in order",
     )
-    evaluate_parser.set_defaults(handler=_cmd_evaluate)
+    presidio_group = evaluate_parser.add_mutually_exclusive_group()
+    presidio_group.add_argument(
+        "--presidio",
+        dest="presidio",
+        action="store_const",
+        const="require",
+        help="require the Presidio baseline arms; fail if Presidio is missing",
+    )
+    presidio_group.add_argument(
+        "--no-presidio",
+        dest="presidio",
+        action="store_const",
+        const="skip",
+        help="skip the Presidio arms even if Presidio is installed",
+    )
+    evaluate_parser.set_defaults(handler=_cmd_evaluate, presidio="auto")
 
     return parser
 
@@ -107,14 +127,14 @@ def _cmd_corpus(args) -> int:
 def _cmd_evaluate(args) -> int:
     corpus = AnnotatedCorpus.from_jsonl(args.corpus.read_text(encoding="utf-8"))
     policy = _resolve_policy(args.policy)
-    report = evaluate(
-        corpus,
-        [
-            RulesOnlyDetector(policy),
-            FlattenedTextDetector(),
-            SchemaConditionedDetector(policy=policy),
-        ],
-    )
+    detectors = [
+        RulesOnlyDetector(policy),
+        FlattenedTextDetector(),
+        SchemaConditionedDetector(policy=policy),
+    ]
+    detectors.extend(_presidio_detectors(args.presidio, policy))
+
+    report = evaluate(corpus, detectors)
 
     print(render(report))
     if args.json:
@@ -122,6 +142,49 @@ def _cmd_evaluate(args) -> int:
         args.json.write_text(report.to_json(), encoding="utf-8")
         print(f"wrote {args.json}", file=sys.stderr)
     return 0
+
+
+def _presidio_detectors(mode: str, policy) -> list:
+    """The two Presidio arms, if they can run.
+
+    Presidio is an optional dependency, so a missing install is not an error by
+    default -- but it is never silent either. The published table includes the
+    Presidio arms, and a run that quietly omitted them would look like the
+    published run while measuring something smaller.
+    """
+    if mode == "skip":
+        return []
+
+    from .eval.presidio_baseline import presidio_available
+
+    if not presidio_available():
+        from .eval.presidio_baseline import _IMPORT_HINT
+
+        if mode == "require":
+            print(_IMPORT_HINT, file=sys.stderr)
+            raise SystemExit(
+                "--presidio was requested but Presidio is not importable"
+            )
+        print(
+            "note: Presidio is not installed, so the two Presidio baseline arms\n"
+            "were skipped. The published table includes them; this run is the\n"
+            "three-arm subset. To match the published figures:\n"
+            f"{_IMPORT_HINT}",
+            file=sys.stderr,
+        )
+        return []
+
+    from .eval.presidio_baseline import (
+        PresidioNarrativeDetector,
+        PresidioTextDetector,
+    )
+
+    return [
+        PresidioTextDetector(),
+        SchemaConditionedDetector(
+            narrative_detector=PresidioNarrativeDetector(), policy=policy
+        ),
+    ]
 
 
 def _resolve_policy(paths: list[Path]):
