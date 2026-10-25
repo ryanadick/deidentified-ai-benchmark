@@ -59,6 +59,38 @@ def test_a_wider_prediction_still_counts_as_found() -> None:
     assert scores.untyped.precision == 1.0
 
 
+def test_one_segment_wide_span_scores_perfectly_and_the_ratio_says_so() -> None:
+    """The exploit both scoring rules share, and the guard on it.
+
+    A single prediction swallowing a whole segment fully covers every gold span
+    inside it and overlaps them all, so it earns recall 1.0 and precision 1.0
+    while flagging most of the message. This is what a general-purpose NER
+    model actually does to caret-delimited HL7, so the number that exposes it
+    has to be reported next to the rates it inflates.
+    """
+    annotations = [gold(10, 18, "Vanbrugh"), gold(19, 26, "Bartram")]
+    swallowed = [predicted(0, 100, "x" * 100)]
+
+    scores = score_message(annotations, swallowed)
+
+    assert scores.untyped.recall == 1.0
+    assert scores.untyped.precision == 1.0
+    # 15 characters of real PHI, 100 flagged.
+    assert scores.untyped.gold_chars == 15
+    assert scores.untyped.predicted_chars == 100
+    assert scores.untyped.flagged_ratio == pytest.approx(100 / 15)
+
+
+def test_flagged_ratio_is_about_one_for_tight_detections() -> None:
+    scores = score_message([gold(10, 18, "Vanbrugh")], [predicted(10, 18, "Vanbrugh")])
+    assert scores.untyped.flagged_ratio == pytest.approx(1.0)
+
+
+def test_flagged_ratio_is_zero_with_no_ground_truth() -> None:
+    """No division by zero on a message with nothing planted in it."""
+    assert score_message([], []).untyped.flagged_ratio == 0.0
+
+
 def test_partial_coverage_is_not_a_true_positive() -> None:
     """A detector that finds "brugh" inside "Vanbrugh" has left PHI in the output.
 

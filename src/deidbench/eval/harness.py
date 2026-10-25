@@ -36,6 +36,10 @@ class EvaluationReport:
                 "fully covers it; partial coverage still leaks PHI",
                 "precision": "a prediction counts as correct if it overlaps any "
                 "gold span; over-prediction costs utility, not privacy",
+                "flagged_ratio": "characters flagged per character of real PHI; "
+                "both rules above can be gamed by a span that swallows a whole "
+                "segment, so a ratio far above 1.0 makes that arm's recall and "
+                "precision upper bounds",
                 "caveat": "synthetic planted-PHI corpus: a floor and a "
                 "methodology demonstration, not production measurement",
             },
@@ -50,7 +54,10 @@ def evaluate(corpus: Corpus, detectors: list[Detector]) -> EvaluationReport:
     report = EvaluationReport(corpus_summary=corpus.summary())
 
     for detector in detectors:
-        detector_report = DetectorReport(detector=detector.name)
+        detector_report = DetectorReport(
+            detector=detector.name,
+            provenance=dict(getattr(detector, "provenance", {}) or {}),
+        )
         started = time.perf_counter()
 
         for message in corpus.messages:
@@ -84,15 +91,22 @@ def render(report: EvaluationReport) -> str:
     lines.append("OVERALL (untyped: would this have been removed?)")
     lines.append(
         f"  {'detector':<26} {'recall':>7} {'prec':>7} {'F1':>7} "
-        f"{'missed':>7} {'partial':>8} {'FP':>7} {'ms':>8}"
+        f"{'missed':>7} {'partial':>8} {'FP':>7} {'chars x':>8} {'ms':>8}"
     )
     for detector in report.detectors:
         score = detector.untyped
         lines.append(
             f"  {detector.detector:<26} {score.recall:>7.3f} {score.precision:>7.3f} "
             f"{score.f1:>7.3f} {score.missed:>7} {score.partial:>8} "
-            f"{score.false_positives:>7} {detector.duration_ms:>8.0f}"
+            f"{score.false_positives:>7} {score.flagged_ratio:>8.1f} "
+            f"{detector.duration_ms:>8.0f}"
         )
+    lines.append(
+        "  'chars x' is characters flagged per character of real PHI. A span\n"
+        "  that swallows a whole segment covers every gold span inside it, so\n"
+        "  it earns recall and precision at once; a ratio far above 1.0 means\n"
+        "  that arm's rates are upper bounds, not clean detections."
+    )
     lines.append("")
 
     lines.append("TYPED (would it have been replaced with the right kind of surrogate?)")
@@ -166,10 +180,24 @@ def render(report: EvaluationReport) -> str:
         lines.append(f"  {detector.detector}: {summary}")
     lines.append("")
 
+    provenanced = [d for d in report.detectors if d.provenance]
+    if provenanced:
+        lines.append("BASELINE PROVENANCE")
+        for detector in provenanced:
+            details = ", ".join(
+                f"{key}={value}" for key, value in sorted(detector.provenance.items())
+            )
+            lines.append(f"  {detector.detector}: {details}")
+        lines.append(
+            "  A third-party baseline's version is part of its score. Reporting\n"
+            "  the number without it is not a reproducible comparison."
+        )
+        lines.append("")
+
     lines.append(
         "Scoring: recall requires full coverage of a gold span (partial coverage\n"
-        "still leaks PHI); precision credits any overlap. Synthetic planted-PHI\n"
-        "corpus -- a floor and a methodology demonstration, not production\n"
-        "measurement."
+        "still leaks PHI); precision credits any overlap; 'chars x' guards both\n"
+        "against arms that score by over-flagging. Synthetic planted-PHI corpus\n"
+        "-- a floor and a methodology demonstration, not production measurement."
     )
     return "\n".join(lines)

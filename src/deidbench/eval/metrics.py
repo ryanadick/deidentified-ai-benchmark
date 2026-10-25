@@ -18,6 +18,16 @@ should not be punished as though it invented the name.
 The asymmetry is intentional: strict where a mistake leaks PHI, lenient where a
 mistake only costs data.
 
+**Both rules have the same exploit, so both are reported against a character
+count.** A prediction that swallows an entire segment fully covers every gold
+span inside it, and overlaps a gold span too -- so it collects recall *and*
+precision while flagging most of the message. This is not hypothetical: a
+general-purpose NER model run on caret-delimited HL7 emits exactly these
+segment-wide spans, because the delimiters give it no sentence structure to
+work with. ``Score.flagged_ratio`` -- characters flagged per character of real
+PHI -- is the guard. When it is far above 1.0, read that arm's recall and
+precision as upper bounds.
+
 Typed scores additionally require the predicted PHI category to match. Both are
 reported, because they answer different questions -- untyped asks "would this
 have been removed?", typed asks "would it have been replaced with the right
@@ -44,10 +54,27 @@ class Score:
     partial: int = 0
     #: Predictions overlapping some gold span.
     useful_predictions: int = 0
+    #: Characters of ground truth, and characters a detector flagged. Their
+    #: ratio is the guard on the lenient precision rule: a detector that flags
+    #: whole segments scores well on both recall and precision here, because a
+    #: span swallowing a segment "covers" every gold span inside it. Only the
+    #: character ratio shows that it did so by flagging ten times the text.
+    gold_chars: int = 0
+    predicted_chars: int = 0
 
     @property
     def missed(self) -> int:
         return self.gold - self.covered
+
+    @property
+    def flagged_ratio(self) -> float:
+        """Flagged characters per character of real PHI.
+
+        ``1.0`` is a detector flagging exactly the PHI. Large values mean the
+        recall and precision above are bought with over-flagging, and should be
+        read as upper bounds.
+        """
+        return self.predicted_chars / self.gold_chars if self.gold_chars else 0.0
 
     @property
     def recall(self) -> float:
@@ -73,11 +100,16 @@ class Score:
         self.covered += other.covered
         self.partial += other.partial
         self.useful_predictions += other.useful_predictions
+        self.gold_chars += other.gold_chars
+        self.predicted_chars += other.predicted_chars
 
     def to_dict(self) -> dict:
         return {
             "gold": self.gold,
             "predicted": self.predicted,
+            "gold_chars": self.gold_chars,
+            "predicted_chars": self.predicted_chars,
+            "flagged_ratio": round(self.flagged_ratio, 3),
             "covered": self.covered,
             "partial": self.partial,
             "missed": self.missed,
@@ -112,10 +144,17 @@ def score_message(
     """Score one message's predictions against its ground truth."""
     scores = MessageScores()
 
+    gold_chars = sum(a.end - a.start for a in annotations)
+    predicted_chars = sum(d.end - d.start for d in detections)
+
     scores.untyped.gold = len(annotations)
     scores.untyped.predicted = len(detections)
+    scores.untyped.gold_chars = gold_chars
+    scores.untyped.predicted_chars = predicted_chars
     scores.typed.gold = len(annotations)
     scores.typed.predicted = len(detections)
+    scores.typed.gold_chars = gold_chars
+    scores.typed.predicted_chars = predicted_chars
 
     for annotation in annotations:
         location = scores.by_location_class.setdefault(
@@ -126,6 +165,9 @@ def score_message(
         location.gold += 1
         phi.gold += 1
         segment.gold += 1
+        location.gold_chars += annotation.end - annotation.start
+        phi.gold_chars += annotation.end - annotation.start
+        segment.gold_chars += annotation.end - annotation.start
 
         covering = [
             d for d in detections if d.covers(annotation.start, annotation.end)
@@ -173,6 +215,10 @@ def score_message(
                 scores.by_location_class[annotation.location_class].predicted += 1
                 scores.by_phi_type[annotation.phi_type].predicted += 1
                 scores.by_segment[annotation.segment].predicted += 1
+                width = detection.end - detection.start
+                scores.by_location_class[annotation.location_class].predicted_chars += width
+                scores.by_phi_type[annotation.phi_type].predicted_chars += width
+                scores.by_segment[annotation.segment].predicted_chars += width
         else:
             scores.spurious.append(detection)
 
@@ -196,6 +242,9 @@ class DetectorReport:
     #: Gold spans never covered, by PHI type and location class.
     misses_by_location_class: dict[str, int] = field(default_factory=dict)
     duration_ms: float = 0.0
+    #: Versions and configuration for arms wrapping a third-party tool. A
+    #: published baseline's score is not reproducible without them.
+    provenance: dict = field(default_factory=dict)
 
     def add(self, scores: MessageScores) -> None:
         self.messages += 1
@@ -223,6 +272,7 @@ class DetectorReport:
             "detector": self.detector,
             "messages": self.messages,
             "duration_ms": round(self.duration_ms, 1),
+            "provenance": self.provenance,
             "untyped": self.untyped.to_dict(),
             "typed": self.typed.to_dict(),
             "by_location_class": {
