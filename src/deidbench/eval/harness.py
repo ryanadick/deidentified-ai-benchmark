@@ -107,6 +107,13 @@ def render(report: EvaluationReport) -> str:
         "  it earns recall and precision at once; a ratio far above 1.0 means\n"
         "  that arm's rates are upper bounds, not clean detections."
     )
+    if any(d.provenance.get("batched") for d in report.detectors):
+        lines.append(
+            "  'ms' is not comparable across all arms. An arm marked batched in\n"
+            "  the provenance below does its real work in a priming pass before\n"
+            "  scoring starts, so its figure here counts cache lookups only and\n"
+            "  understates the tool by orders of magnitude."
+        )
     lines.append("")
 
     lines.append("TYPED (would it have been replaced with the right kind of surrogate?)")
