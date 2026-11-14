@@ -1,0 +1,133 @@
+========================================================================
+WHAT ACTUALLY VARIES -- the prompt prefix, for two candidates
+========================================================================
+
+  PID-5-1  (policy HAS a rule)   value: 'Barnabus Drummond'
+    none    (nothing)
+    terse   Structural context of this field: segment=PID, field=5, component=1, data_type=XPN, description=Patient Name
+    plain   This value was taken from component 1 of field 5 of the PID segment of an HL7 v2 message. Its HL7 data type is XPN. That location holds: Patient Name.
+    domain  This value was taken from component 1 of field 5 of the PID segment of an HL7 v2 message. The HL7 specification gives this location the data type XPN, holding Patient Name.
+
+  ZIN-3  (policy has NO rule)   value: '716-555-0142'
+    none    (nothing)
+    terse   Structural context of this field: segment=ZIN, field=3, description=no policy rule for this location
+    plain   This value was taken from field 3 of the ZIN segment of an HL7 v2 message.
+    domain  This value was taken from field 3 of the ZIN segment of an HL7 v2 message. ZIN is a site-defined Z-segment and is not part of the HL7 standard, so the specification says nothing about what this field contains. Judge the value on its own terms.
+
+ollama 0.40.10 at http://mini.local:11434, model qwen3:14b
+generating 25 messages at seed 20261013 ...
+arms: rules-only, hybrid+ollama:qwen3:14b+none, hybrid+ollama:qwen3:14b+terse, hybrid+ollama:qwen3:14b+plain, hybrid+ollama:qwen3:14b+domain
+running ...
+
+CORPUS
+  25 messages, 1275 annotated PHI spans
+  structured=1002  narrative=208  nonstandard=55  misused=10
+
+OVERALL (untyped: would this have been removed?)
+  detector                    recall    prec      F1  missed  partial      FP  chars x       ms
+  rules-only                   0.812   1.000   0.896     240        0       0      0.8       30
+  hybrid+ollama:qwen3:14b+none   0.992   0.986   0.989      10        2      18      1.0   301821
+  hybrid+ollama:qwen3:14b+terse   0.994   0.968   0.981       8        3      41      1.0   319275
+  hybrid+ollama:qwen3:14b+plain   0.993   0.949   0.970       9        3      66      1.1   328707
+  hybrid+ollama:qwen3:14b+domain   0.992   0.930   0.960      10        3      92      1.1   378705
+  'chars x' is characters flagged per character of real PHI. A span
+  that swallows a whole segment covers every gold span inside it, so
+  it earns recall and precision at once; a ratio far above 1.0 means
+  that arm's rates are upper bounds, not clean detections.
+
+TYPED (would it have been replaced with the right kind of surrogate?)
+  detector                    recall    prec      F1
+  rules-only                   0.788   0.971   0.870
+  hybrid+ollama:qwen3:14b+none   0.895   0.916   0.905
+  hybrid+ollama:qwen3:14b+terse   0.894   0.898   0.896
+  hybrid+ollama:qwen3:14b+plain   0.893   0.880   0.887
+  hybrid+ollama:qwen3:14b+domain   0.890   0.861   0.875
+
+RECALL BY LOCATION CLASS
+  detector                      structured     narrative   nonstandard       misused
+  rules-only                    1.000         0.000         0.509         0.500     
+  hybrid+ollama:qwen3:14b+none    1.000         0.962         0.964         1.000     
+  hybrid+ollama:qwen3:14b+terse    1.000         0.966         0.982         1.000     
+  hybrid+ollama:qwen3:14b+plain    1.000         0.966         0.964         1.000     
+  hybrid+ollama:qwen3:14b+domain    1.000         0.966         0.945         1.000     
+
+RECALL BY SEGMENT
+  detector                       ZIN     ZPD     AL1     DG1     EVN     MSH     NK1     NTE     OBX     PID     PV1
+  rules-only                    0.00    0.80    0.00    0.00    1.00    1.00    1.00    0.00    0.00    1.00    0.98
+  hybrid+ollama:qwen3:14b+none    0.90    1.00    1.00    0.80    1.00    1.00    1.00    0.99    0.96    1.00    1.00
+  hybrid+ollama:qwen3:14b+terse    0.95    1.00    1.00    0.80    1.00    1.00    1.00    0.99    0.97    1.00    1.00
+  hybrid+ollama:qwen3:14b+plain    0.90    1.00    1.00    0.80    1.00    1.00    1.00    0.99    0.97    1.00    1.00
+  hybrid+ollama:qwen3:14b+domain    0.85    1.00    1.00    0.80    1.00    1.00    1.00    0.99    0.97    1.00    1.00
+  ZPD is a Z-segment the shipped policy describes; ZIN is one it has
+  never seen. The gap between them is how much of the non-standard
+  problem is solved only by having read the feed first.
+
+WORST PHI TYPES BY RECALL
+  rules-only
+    name_freeform            recall 0.304  (7/23)
+    given_name               recall 0.521  (50/96)
+    family_name              recall 0.575  (50/87)
+    birth_date               recall 0.658  (25/38)
+    street_address           recall 0.735  (50/68)
+    city                     recall 0.781  (50/64)
+  hybrid+ollama:qwen3:14b+none
+    name_freeform            recall 0.913  (21/23)
+    medical_record_number    recall 0.957  (66/69)
+    email                    recall 0.962  (25/26)
+    clinician_name           recall 0.974  (112/115)
+    family_name              recall 0.989  (86/87)
+    event_date               recall 1.000  (125/125)
+  hybrid+ollama:qwen3:14b+terse
+    name_freeform            recall 0.870  (20/23)
+    email                    recall 0.962  (25/26)
+    clinician_name           recall 0.974  (112/115)
+    family_name              recall 0.989  (86/87)
+    event_date               recall 1.000  (125/125)
+    medical_record_number    recall 1.000  (69/69)
+  hybrid+ollama:qwen3:14b+plain
+    name_freeform            recall 0.870  (20/23)
+    email                    recall 0.962  (25/26)
+    clinician_name           recall 0.974  (112/115)
+    medical_record_number    recall 0.986  (68/69)
+    family_name              recall 0.989  (86/87)
+    event_date               recall 1.000  (125/125)
+  hybrid+ollama:qwen3:14b+domain
+    name_freeform            recall 0.870  (20/23)
+    email                    recall 0.962  (25/26)
+    medical_record_number    recall 0.971  (67/69)
+    clinician_name           recall 0.974  (112/115)
+    family_name              recall 0.989  (86/87)
+    event_date               recall 1.000  (125/125)
+
+TOP FALSE-POSITIVE CATEGORIES
+  rules-only: none
+  hybrid+ollama:qwen3:14b+none: event_date=8, organization=5, birth_date=3, name_prefix=2
+  hybrid+ollama:qwen3:14b+terse: birth_date=28, event_date=6, organization=5, name_prefix=2
+  hybrid+ollama:qwen3:14b+plain: organization=55, free_text=3, birth_date=3, event_date=2, name_prefix=2
+  hybrid+ollama:qwen3:14b+domain: organization=55, birth_date=28, free_text=3, event_date=2, identifier=2
+
+BASELINE PROVENANCE
+  hybrid+ollama:qwen3:14b+none: context_style=none, detector=ollama-typing-spike, host=http://mini.local:11434, model=qwen3:14b, seed=20261013, temperature=0.0, use_context=False
+  hybrid+ollama:qwen3:14b+terse: context_style=terse, detector=ollama-typing-spike, host=http://mini.local:11434, model=qwen3:14b, seed=20261013, temperature=0.0, use_context=True
+  hybrid+ollama:qwen3:14b+plain: context_style=plain, detector=ollama-typing-spike, host=http://mini.local:11434, model=qwen3:14b, seed=20261013, temperature=0.0, use_context=True
+  hybrid+ollama:qwen3:14b+domain: context_style=domain, detector=ollama-typing-spike, host=http://mini.local:11434, model=qwen3:14b, seed=20261013, temperature=0.0, use_context=True
+  A third-party baseline's version is part of its score. Reporting
+  the number without it is not a reproducible comparison.
+
+Scoring: recall requires full coverage of a gold span (partial coverage
+still leaks PHI); precision credits any overlap; 'chars x' guards both
+against arms that score by over-flagging. Synthetic planted-PHI corpus
+-- a floor and a methodology demonstration, not production measurement.
+
+model usage
+  ollama:qwen3:14b+none        898 calls, 0 failed, 0 unparseable, 264.9s total, 0.30s/call, 5139 output tokens
+  ollama:qwen3:14b+terse       898 calls, 0 failed, 0 unparseable, 282.8s total, 0.31s/call, 5479 output tokens
+  ollama:qwen3:14b+plain       898 calls, 0 failed, 0 unparseable, 292.5s total, 0.33s/call, 5783 output tokens
+  ollama:qwen3:14b+domain      898 calls, 0 failed, 0 unparseable, 340.6s total, 0.38s/call, 6120 output tokens
+
+wrote experiments/results/context-variants-20261030.json
+
+Read the NON-STANDARD and ZIN rows, not the aggregate. The aggregate
+is dominated by structured fields the rules already resolve, where the
+wording cannot matter. If any variant moves a number, it moves it where
+the policy is silent -- which is the whole of Aim 2.

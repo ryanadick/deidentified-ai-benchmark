@@ -1,0 +1,78 @@
+arms: rules-only, hybrid+ollama:qwen3:14b+none, whole-message:qwen3:14b
+CORPUS
+  25 messages, 1275 annotated PHI spans
+  structured=1002  narrative=208  nonstandard=55  misused=10
+
+OVERALL (untyped: would this have been removed?)
+  detector                    recall    prec      F1  missed  partial      FP  chars x       ms
+  rules-only                   0.812   1.000   0.896     240        0       0      0.8      229
+  hybrid+ollama:qwen3:14b+none   0.992   0.986   0.989      10        2      18      1.0   349228
+  whole-message:qwen3:14b      0.628   0.908   0.742     474       14      71      0.8   518627
+  'chars x' is characters flagged per character of real PHI. A span
+  that swallows a whole segment covers every gold span inside it, so
+  it earns recall and precision at once; a ratio far above 1.0 means
+  that arm's rates are upper bounds, not clean detections.
+
+TYPED (would it have been replaced with the right kind of surrogate?)
+  detector                    recall    prec      F1
+  rules-only                   0.788   0.971   0.870
+  hybrid+ollama:qwen3:14b+none   0.895   0.916   0.905
+  whole-message:qwen3:14b      0.456   0.754   0.569
+
+RECALL BY LOCATION CLASS
+  detector                      structured     narrative   nonstandard       misused
+  rules-only                    1.000         0.000         0.509         0.500     
+  hybrid+ollama:qwen3:14b+none    1.000         0.962         0.964         1.000     
+  whole-message:qwen3:14b       0.618         0.683         0.600         0.700     
+
+RECALL BY SEGMENT
+  detector                       ZIN     ZPD     AL1     DG1     EVN     MSH     NK1     NTE     OBX     PID     PV1
+  rules-only                    0.00    0.80    0.00    0.00    1.00    1.00    1.00    0.00    0.00    1.00    0.98
+  hybrid+ollama:qwen3:14b+none    0.90    1.00    1.00    0.80    1.00    1.00    1.00    0.99    0.96    1.00    1.00
+  whole-message:qwen3:14b       0.70    0.54    0.57    0.67    0.24    0.76    0.62    0.75    0.66    0.77    0.23
+  ZPD is a Z-segment the shipped policy describes; ZIN is one it has
+  never seen. The gap between them is how much of the non-standard
+  problem is solved only by having read the feed first.
+
+WORST PHI TYPES BY RECALL
+  rules-only
+    name_freeform            recall 0.304  (7/23)
+    given_name               recall 0.521  (50/96)
+    family_name              recall 0.575  (50/87)
+    birth_date               recall 0.658  (25/38)
+    street_address           recall 0.735  (50/68)
+    city                     recall 0.781  (50/64)
+  hybrid+ollama:qwen3:14b+none
+    name_freeform            recall 0.913  (21/23)
+    medical_record_number    recall 0.957  (66/69)
+    email                    recall 0.962  (25/26)
+    clinician_name           recall 0.974  (112/115)
+    family_name              recall 0.989  (86/87)
+    event_date               recall 1.000  (125/125)
+  whole-message:qwen3:14b
+    event_date               recall 0.288  (36/125)
+    organization             recall 0.324  (11/34)
+    account_number           recall 0.339  (19/56)
+    clinician_name           recall 0.357  (41/115)
+    state                    recall 0.471  (40/85)
+    medical_record_number    recall 0.507  (35/69)
+
+TOP FALSE-POSITIVE CATEGORIES
+  rules-only: none
+  hybrid+ollama:qwen3:14b+none: event_date=8, organization=5, birth_date=3, name_prefix=2
+  whole-message:qwen3:14b: country=27, identifier=16, name_prefix=10, free_text=5, name_suffix=5
+
+BASELINE PROVENANCE
+  hybrid+ollama:qwen3:14b+none: context_style=none, detector=ollama-typing-spike, host=http://mini.local:11434, model=qwen3:14b, seed=20261013, temperature=0.0, use_context=False
+  whole-message:qwen3:14b: context_style=none, detector=ollama-typing-spike, host=http://mini.local:11434, model=qwen3:14b, seed=20261013, temperature=0.0, use_context=False
+  A third-party baseline's version is part of its score. Reporting
+  the number without it is not a reproducible comparison.
+
+Scoring: recall requires full coverage of a gold span (partial coverage
+still leaks PHI); precision credits any overlap; 'chars x' guards both
+against arms that score by over-flagging. Synthetic planted-PHI corpus
+-- a floor and a methodology demonstration, not production measurement.
+
+model usage
+  ollama:qwen3:14b+none        898 calls, 0 failed, 0 unparseable, 267.1s total, 0.30s/call, 5139 output tokens
+  whole-message:qwen3:14b      25 calls, 0 failed, 0 unparseable, 515.5s total, 20.62s/call, 12472 output tokens

@@ -1,0 +1,1907 @@
+{
+  "corpus_summary": {
+    "messages": 25,
+    "annotations": 1275,
+    "by_location_class": {
+      "structured": 1002,
+      "narrative": 208,
+      "misused": 10,
+      "nonstandard": 55
+    },
+    "by_phi_type": {
+      "event_date": 125,
+      "clinician_name": 115,
+      "medical_record_number": 69,
+      "ssn": 54,
+      "family_name": 87,
+      "given_name": 96,
+      "middle_name": 25,
+      "name_suffix": 18,
+      "birth_date": 38,
+      "street_address": 68,
+      "address_other": 40,
+      "city": 64,
+      "state": 85,
+      "postal_code": 60,
+      "county": 25,
+      "phone": 139,
+      "email": 26,
+      "account_number": 56,
+      "license_number": 28,
+      "organization": 34,
+      "name_freeform": 23
+    },
+    "metadata": {
+      "generator": "deid.corpus.generate",
+      "seed": 20261013,
+      "messages": 25,
+      "reference_date": "2026-10-13",
+      "policy": "hl7v2-pid-baseline+hl7v2-extras+hl7v2-financial",
+      "policy_version": 1,
+      "rates": {
+        "narrative": 0.7,
+        "nonstandard": 0.45,
+        "misuse": 0.35,
+        "odd_delimiter": 0.12,
+        "crlf": 0.2,
+        "loose_date": 0.15,
+        "nonstandard_unknown": 0.3
+      },
+      "note": "Synthetic. No production data. Numbers from a planted-PHI corpus are a floor and a methodology demonstration, not a substitute for measurement on production messages."
+    }
+  },
+  "detectors": [
+    {
+      "detector": "rules-only",
+      "messages": 25,
+      "untyped": {
+        "gold": 1275,
+        "predicted": 1035,
+        "covered": 1035,
+        "partial": 0,
+        "useful_predictions": 1035,
+        "gold_chars": 13087,
+        "predicted_chars": 10631
+      },
+      "typed": {
+        "gold": 1275,
+        "predicted": 1035,
+        "covered": 1005,
+        "partial": 0,
+        "useful_predictions": 1005,
+        "gold_chars": 13087,
+        "predicted_chars": 10631
+      },
+      "by_location_class": {
+        "structured": {
+          "gold": 1002,
+          "predicted": 1002,
+          "covered": 1002,
+          "partial": 0,
+          "useful_predictions": 1002,
+          "gold_chars": 10101,
+          "predicted_chars": 10101
+        },
+        "narrative": {
+          "gold": 208,
+          "predicted": 0,
+          "covered": 0,
+          "partial": 0,
+          "useful_predictions": 0,
+          "gold_chars": 2084,
+          "predicted_chars": 0
+        },
+        "misused": {
+          "gold": 10,
+          "predicted": 5,
+          "covered": 5,
+          "partial": 0,
+          "useful_predictions": 5,
+          "gold_chars": 148,
+          "predicted_chars": 58
+        },
+        "nonstandard": {
+          "gold": 55,
+          "predicted": 28,
+          "covered": 28,
+          "partial": 0,
+          "useful_predictions": 28,
+          "gold_chars": 754,
+          "predicted_chars": 472
+        }
+      },
+      "by_phi_type": {
+        "event_date": {
+          "gold": 125,
+          "predicted": 125,
+          "covered": 125,
+          "partial": 0,
+          "useful_predictions": 125,
+          "gold_chars": 1500,
+          "predicted_chars": 1500
+        },
+        "clinician_name": {
+          "gold": 115,
+          "predicted": 100,
+          "covered": 100,
+          "partial": 0,
+          "useful_predictions": 100,
+          "gold_chars": 950,
+          "predicted_chars": 816
+        },
+        "medical_record_number": {
+          "gold": 69,
+          "predicted": 55,
+          "covered": 55,
+          "partial": 0,
+          "useful_predictions": 55,
+          "gold_chars": 575,
+          "predicted_chars": 463
+        },
+        "ssn": {
+          "gold": 54,
+          "predicted": 52,
+          "covered": 52,
+          "partial": 0,
+          "useful_predictions": 52,
+          "gold_chars": 544,
+          "predicted_chars": 522
+        },
+        "family_name": {
+          "gold": 87,
+          "predicted": 50,
+          "covered": 50,
+          "partial": 0,
+          "useful_predictions": 50,
+          "gold_chars": 735,
+          "predicted_chars": 425
+        },
+        "given_name": {
+          "gold": 96,
+          "predicted": 50,
+          "covered": 50,
+          "partial": 0,
+          "useful_predictions": 50,
+          "gold_chars": 715,
+          "predicted_chars": 372
+        },
+        "middle_name": {
+          "gold": 25,
+          "predicted": 25,
+          "covered": 25,
+          "partial": 0,
+          "useful_predictions": 25,
+          "gold_chars": 189,
+          "predicted_chars": 189
+        },
+        "name_suffix": {
+          "gold": 18,
+          "predicted": 18,
+          "covered": 18,
+          "partial": 0,
+          "useful_predictions": 18,
+          "gold_chars": 41,
+          "predicted_chars": 41
+        },
+        "birth_date": {
+          "gold": 38,
+          "predicted": 25,
+          "covered": 25,
+          "partial": 0,
+          "useful_predictions": 25,
+          "gold_chars": 310,
+          "predicted_chars": 204
+        },
+        "street_address": {
+          "gold": 68,
+          "predicted": 50,
+          "covered": 50,
+          "partial": 0,
+          "useful_predictions": 50,
+          "gold_chars": 1363,
+          "predicted_chars": 994
+        },
+        "address_other": {
+          "gold": 40,
+          "predicted": 36,
+          "covered": 36,
+          "partial": 0,
+          "useful_predictions": 36,
+          "gold_chars": 276,
+          "predicted_chars": 248
+        },
+        "city": {
+          "gold": 64,
+          "predicted": 50,
+          "covered": 50,
+          "partial": 0,
+          "useful_predictions": 50,
+          "gold_chars": 637,
+          "predicted_chars": 496
+        },
+        "state": {
+          "gold": 85,
+          "predicted": 75,
+          "covered": 75,
+          "partial": 0,
+          "useful_predictions": 75,
+          "gold_chars": 170,
+          "predicted_chars": 150
+        },
+        "postal_code": {
+          "gold": 60,
+          "predicted": 50,
+          "covered": 50,
+          "partial": 0,
+          "useful_predictions": 50,
+          "gold_chars": 300,
+          "predicted_chars": 250
+        },
+        "county": {
+          "gold": 25,
+          "predicted": 25,
+          "covered": 25,
+          "partial": 0,
+          "useful_predictions": 25,
+          "gold_chars": 412,
+          "predicted_chars": 412
+        },
+        "phone": {
+          "gold": 139,
+          "predicted": 110,
+          "covered": 110,
+          "partial": 0,
+          "useful_predictions": 110,
+          "gold_chars": 1653,
+          "predicted_chars": 1302
+        },
+        "email": {
+          "gold": 26,
+          "predicted": 25,
+          "covered": 25,
+          "partial": 0,
+          "useful_predictions": 25,
+          "gold_chars": 939,
+          "predicted_chars": 903
+        },
+        "account_number": {
+          "gold": 56,
+          "predicted": 50,
+          "covered": 50,
+          "partial": 0,
+          "useful_predictions": 50,
+          "gold_chars": 616,
+          "predicted_chars": 550
+        },
+        "license_number": {
+          "gold": 28,
+          "predicted": 25,
+          "covered": 25,
+          "partial": 0,
+          "useful_predictions": 25,
+          "gold_chars": 252,
+          "predicted_chars": 225
+        },
+        "organization": {
+          "gold": 34,
+          "predicted": 32,
+          "covered": 32,
+          "partial": 0,
+          "useful_predictions": 32,
+          "gold_chars": 488,
+          "predicted_chars": 436
+        },
+        "name_freeform": {
+          "gold": 23,
+          "predicted": 7,
+          "covered": 7,
+          "partial": 0,
+          "useful_predictions": 7,
+          "gold_chars": 422,
+          "predicted_chars": 133
+        }
+      },
+      "by_segment": {
+        "MSH": {
+          "gold": 25,
+          "predicted": 25,
+          "covered": 25,
+          "partial": 0,
+          "useful_predictions": 25,
+          "gold_chars": 300,
+          "predicted_chars": 300
+        },
+        "EVN": {
+          "gold": 100,
+          "predicted": 100,
+          "covered": 100,
+          "partial": 0,
+          "useful_predictions": 100,
+          "gold_chars": 1008,
+          "predicted_chars": 1008
+        },
+        "PID": {
+          "gold": 564,
+          "predicted": 564,
+          "covered": 564,
+          "partial": 0,
+          "useful_predictions": 564,
+          "gold_chars": 5828,
+          "predicted_chars": 5828
+        },
+        "NK1": {
+          "gold": 193,
+          "predicted": 193,
+          "covered": 193,
+          "partial": 0,
+          "useful_predictions": 193,
+          "gold_chars": 1740,
+          "predicted_chars": 1740
+        },
+        "PV1": {
+          "gold": 127,
+          "predicted": 125,
+          "covered": 125,
+          "partial": 0,
+          "useful_predictions": 125,
+          "gold_chars": 1320,
+          "predicted_chars": 1283
+        },
+        "OBX": {
+          "gold": 114,
+          "predicted": 0,
+          "covered": 0,
+          "partial": 0,
+          "useful_predictions": 0,
+          "gold_chars": 1146,
+          "predicted_chars": 0
+        },
+        "NTE": {
+          "gold": 68,
+          "predicted": 0,
+          "covered": 0,
+          "partial": 0,
+          "useful_predictions": 0,
+          "gold_chars": 694,
+          "predicted_chars": 0
+        },
+        "DG1": {
+          "gold": 15,
+          "predicted": 0,
+          "covered": 0,
+          "partial": 0,
+          "useful_predictions": 0,
+          "gold_chars": 159,
+          "predicted_chars": 0
+        },
+        "AL1": {
+          "gold": 14,
+          "predicted": 0,
+          "covered": 0,
+          "partial": 0,
+          "useful_predictions": 0,
+          "gold_chars": 138,
+          "predicted_chars": 0
+        },
+        "ZIN": {
+          "gold": 20,
+          "predicted": 0,
+          "covered": 0,
+          "partial": 0,
+          "useful_predictions": 0,
+          "gold_chars": 226,
+          "predicted_chars": 0
+        },
+        "ZPD": {
+          "gold": 35,
+          "predicted": 28,
+          "covered": 28,
+          "partial": 0,
+          "useful_predictions": 28,
+          "gold_chars": 528,
+          "predicted_chars": 472
+        }
+      },
+      "spurious_by_phi_type": {},
+      "misses_by_location_class": {
+        "narrative": 208,
+        "nonstandard": 27,
+        "misused": 5
+      },
+      "duration_ms": 29.910124838352203,
+      "provenance": {}
+    },
+    {
+      "detector": "hybrid+ollama:qwen3:14b+none",
+      "messages": 25,
+      "untyped": {
+        "gold": 1275,
+        "predicted": 1246,
+        "covered": 1265,
+        "partial": 2,
+        "useful_predictions": 1228,
+        "gold_chars": 13087,
+        "predicted_chars": 13291
+      },
+      "typed": {
+        "gold": 1275,
+        "predicted": 1246,
+        "covered": 1141,
+        "partial": 0,
+        "useful_predictions": 1141,
+        "gold_chars": 13087,
+        "predicted_chars": 13291
+      },
+      "by_location_class": {
+        "structured": {
+          "gold": 1002,
+          "predicted": 1002,
+          "covered": 1002,
+          "partial": 0,
+          "useful_predictions": 1002,
+          "gold_chars": 10101,
+          "predicted_chars": 10101
+        },
+        "narrative": {
+          "gold": 208,
+          "predicted": 163,
+          "covered": 200,
+          "partial": 2,
+          "useful_predictions": 163,
+          "gold_chars": 2084,
+          "predicted_chars": 2043
+        },
+        "misused": {
+          "gold": 10,
+          "predicted": 10,
+          "covered": 10,
+          "partial": 0,
+          "useful_predictions": 10,
+          "gold_chars": 148,
+          "predicted_chars": 148
+        },
+        "nonstandard": {
+          "gold": 55,
+          "predicted": 53,
+          "covered": 53,
+          "partial": 0,
+          "useful_predictions": 53,
+          "gold_chars": 754,
+          "predicted_chars": 738
+        }
+      },
+      "by_phi_type": {
+        "event_date": {
+          "gold": 125,
+          "predicted": 125,
+          "covered": 125,
+          "partial": 0,
+          "useful_predictions": 125,
+          "gold_chars": 1500,
+          "predicted_chars": 1500
+        },
+        "clinician_name": {
+          "gold": 115,
+          "predicted": 108,
+          "covered": 112,
+          "partial": 0,
+          "useful_predictions": 108,
+          "gold_chars": 950,
+          "predicted_chars": 925
+        },
+        "medical_record_number": {
+          "gold": 69,
+          "predicted": 66,
+          "covered": 66,
+          "partial": 0,
+          "useful_predictions": 66,
+          "gold_chars": 575,
+          "predicted_chars": 551
+        },
+        "ssn": {
+          "gold": 54,
+          "predicted": 54,
+          "covered": 54,
+          "partial": 0,
+          "useful_predictions": 54,
+          "gold_chars": 544,
+          "predicted_chars": 544
+        },
+        "family_name": {
+          "gold": 87,
+          "predicted": 57,
+          "covered": 86,
+          "partial": 0,
+          "useful_predictions": 57,
+          "gold_chars": 735,
+          "predicted_chars": 485
+        },
+        "given_name": {
+          "gold": 96,
+          "predicted": 96,
+          "covered": 96,
+          "partial": 0,
+          "useful_predictions": 96,
+          "gold_chars": 715,
+          "predicted_chars": 987
+        },
+        "middle_name": {
+          "gold": 25,
+          "predicted": 25,
+          "covered": 25,
+          "partial": 0,
+          "useful_predictions": 25,
+          "gold_chars": 189,
+          "predicted_chars": 189
+        },
+        "name_suffix": {
+          "gold": 18,
+          "predicted": 18,
+          "covered": 18,
+          "partial": 0,
+          "useful_predictions": 18,
+          "gold_chars": 41,
+          "predicted_chars": 41
+        },
+        "birth_date": {
+          "gold": 38,
+          "predicted": 38,
+          "covered": 38,
+          "partial": 0,
+          "useful_predictions": 38,
+          "gold_chars": 310,
+          "predicted_chars": 310
+        },
+        "street_address": {
+          "gold": 68,
+          "predicted": 68,
+          "covered": 68,
+          "partial": 0,
+          "useful_predictions": 68,
+          "gold_chars": 1363,
+          "predicted_chars": 1395
+        },
+        "address_other": {
+          "gold": 40,
+          "predicted": 36,
+          "covered": 40,
+          "partial": 0,
+          "useful_predictions": 36,
+          "gold_chars": 276,
+          "predicted_chars": 248
+        },
+        "city": {
+          "gold": 64,
+          "predicted": 64,
+          "covered": 64,
+          "partial": 0,
+          "useful_predictions": 64,
+          "gold_chars": 637,
+          "predicted_chars": 655
+        },
+        "state": {
+          "gold": 85,
+          "predicted": 83,
+          "covered": 85,
+          "partial": 0,
+          "useful_predictions": 83,
+          "gold_chars": 170,
+          "predicted_chars": 166
+        },
+        "postal_code": {
+          "gold": 60,
+          "predicted": 58,
+          "covered": 60,
+          "partial": 0,
+          "useful_predictions": 58,
+          "gold_chars": 300,
+          "predicted_chars": 290
+        },
+        "county": {
+          "gold": 25,
+          "predicted": 25,
+          "covered": 25,
+          "partial": 0,
+          "useful_predictions": 25,
+          "gold_chars": 412,
+          "predicted_chars": 412
+        },
+        "phone": {
+          "gold": 139,
+          "predicted": 139,
+          "covered": 139,
+          "partial": 0,
+          "useful_predictions": 139,
+          "gold_chars": 1653,
+          "predicted_chars": 1653
+        },
+        "email": {
+          "gold": 26,
+          "predicted": 25,
+          "covered": 25,
+          "partial": 0,
+          "useful_predictions": 25,
+          "gold_chars": 939,
+          "predicted_chars": 903
+        },
+        "account_number": {
+          "gold": 56,
+          "predicted": 56,
+          "covered": 56,
+          "partial": 0,
+          "useful_predictions": 56,
+          "gold_chars": 616,
+          "predicted_chars": 616
+        },
+        "license_number": {
+          "gold": 28,
+          "predicted": 28,
+          "covered": 28,
+          "partial": 0,
+          "useful_predictions": 28,
+          "gold_chars": 252,
+          "predicted_chars": 252
+        },
+        "organization": {
+          "gold": 34,
+          "predicted": 34,
+          "covered": 34,
+          "partial": 0,
+          "useful_predictions": 34,
+          "gold_chars": 488,
+          "predicted_chars": 488
+        },
+        "name_freeform": {
+          "gold": 23,
+          "predicted": 25,
+          "covered": 21,
+          "partial": 2,
+          "useful_predictions": 25,
+          "gold_chars": 422,
+          "predicted_chars": 420
+        }
+      },
+      "by_segment": {
+        "MSH": {
+          "gold": 25,
+          "predicted": 25,
+          "covered": 25,
+          "partial": 0,
+          "useful_predictions": 25,
+          "gold_chars": 300,
+          "predicted_chars": 300
+        },
+        "EVN": {
+          "gold": 100,
+          "predicted": 100,
+          "covered": 100,
+          "partial": 0,
+          "useful_predictions": 100,
+          "gold_chars": 1008,
+          "predicted_chars": 1008
+        },
+        "PID": {
+          "gold": 564,
+          "predicted": 564,
+          "covered": 564,
+          "partial": 0,
+          "useful_predictions": 564,
+          "gold_chars": 5828,
+          "predicted_chars": 5828
+        },
+        "NK1": {
+          "gold": 193,
+          "predicted": 193,
+          "covered": 193,
+          "partial": 0,
+          "useful_predictions": 193,
+          "gold_chars": 1740,
+          "predicted_chars": 1740
+        },
+        "PV1": {
+          "gold": 127,
+          "predicted": 127,
+          "covered": 127,
+          "partial": 0,
+          "useful_predictions": 127,
+          "gold_chars": 1320,
+          "predicted_chars": 1320
+        },
+        "OBX": {
+          "gold": 114,
+          "predicted": 87,
+          "covered": 110,
+          "partial": 0,
+          "useful_predictions": 87,
+          "gold_chars": 1146,
+          "predicted_chars": 1119
+        },
+        "NTE": {
+          "gold": 68,
+          "predicted": 59,
+          "covered": 67,
+          "partial": 0,
+          "useful_predictions": 59,
+          "gold_chars": 694,
+          "predicted_chars": 703
+        },
+        "DG1": {
+          "gold": 15,
+          "predicted": 9,
+          "covered": 12,
+          "partial": 0,
+          "useful_predictions": 9,
+          "gold_chars": 159,
+          "predicted_chars": 133
+        },
+        "AL1": {
+          "gold": 14,
+          "predicted": 11,
+          "covered": 14,
+          "partial": 0,
+          "useful_predictions": 11,
+          "gold_chars": 138,
+          "predicted_chars": 141
+        },
+        "ZIN": {
+          "gold": 20,
+          "predicted": 18,
+          "covered": 18,
+          "partial": 0,
+          "useful_predictions": 18,
+          "gold_chars": 226,
+          "predicted_chars": 210
+        },
+        "ZPD": {
+          "gold": 35,
+          "predicted": 35,
+          "covered": 35,
+          "partial": 0,
+          "useful_predictions": 35,
+          "gold_chars": 528,
+          "predicted_chars": 528
+        }
+      },
+      "spurious_by_phi_type": {
+        "organization": 5,
+        "event_date": 8,
+        "name_prefix": 2,
+        "birth_date": 3
+      },
+      "misses_by_location_class": {
+        "narrative": 8,
+        "nonstandard": 2
+      },
+      "duration_ms": 301820.5937920138,
+      "provenance": {
+        "detector": "ollama-typing-spike",
+        "model": "qwen3:14b",
+        "host": "http://mini.local:11434",
+        "use_context": false,
+        "context_style": "none",
+        "temperature": 0.0,
+        "seed": 20261013
+      }
+    },
+    {
+      "detector": "hybrid+ollama:qwen3:14b+terse",
+      "messages": 25,
+      "untyped": {
+        "gold": 1275,
+        "predicted": 1270,
+        "covered": 1267,
+        "partial": 3,
+        "useful_predictions": 1229,
+        "gold_chars": 13087,
+        "predicted_chars": 13411
+      },
+      "typed": {
+        "gold": 1275,
+        "predicted": 1270,
+        "covered": 1140,
+        "partial": 0,
+        "useful_predictions": 1140,
+        "gold_chars": 13087,
+        "predicted_chars": 13411
+      },
+      "by_location_class": {
+        "structured": {
+          "gold": 1002,
+          "predicted": 1002,
+          "covered": 1002,
+          "partial": 0,
+          "useful_predictions": 1002,
+          "gold_chars": 10101,
+          "predicted_chars": 10101
+        },
+        "narrative": {
+          "gold": 208,
+          "predicted": 161,
+          "covered": 201,
+          "partial": 2,
+          "useful_predictions": 161,
+          "gold_chars": 2084,
+          "predicted_chars": 2068
+        },
+        "misused": {
+          "gold": 10,
+          "predicted": 10,
+          "covered": 10,
+          "partial": 0,
+          "useful_predictions": 10,
+          "gold_chars": 148,
+          "predicted_chars": 148
+        },
+        "nonstandard": {
+          "gold": 55,
+          "predicted": 56,
+          "covered": 54,
+          "partial": 1,
+          "useful_predictions": 56,
+          "gold_chars": 754,
+          "predicted_chars": 753
+        }
+      },
+      "by_phi_type": {
+        "event_date": {
+          "gold": 125,
+          "predicted": 125,
+          "covered": 125,
+          "partial": 0,
+          "useful_predictions": 125,
+          "gold_chars": 1500,
+          "predicted_chars": 1500
+        },
+        "clinician_name": {
+          "gold": 115,
+          "predicted": 108,
+          "covered": 112,
+          "partial": 0,
+          "useful_predictions": 108,
+          "gold_chars": 950,
+          "predicted_chars": 925
+        },
+        "medical_record_number": {
+          "gold": 69,
+          "predicted": 69,
+          "covered": 69,
+          "partial": 0,
+          "useful_predictions": 69,
+          "gold_chars": 575,
+          "predicted_chars": 575
+        },
+        "ssn": {
+          "gold": 54,
+          "predicted": 54,
+          "covered": 54,
+          "partial": 0,
+          "useful_predictions": 54,
+          "gold_chars": 544,
+          "predicted_chars": 544
+        },
+        "family_name": {
+          "gold": 87,
+          "predicted": 58,
+          "covered": 86,
+          "partial": 0,
+          "useful_predictions": 58,
+          "gold_chars": 735,
+          "predicted_chars": 501
+        },
+        "given_name": {
+          "gold": 96,
+          "predicted": 96,
+          "covered": 96,
+          "partial": 0,
+          "useful_predictions": 96,
+          "gold_chars": 715,
+          "predicted_chars": 982
+        },
+        "middle_name": {
+          "gold": 25,
+          "predicted": 25,
+          "covered": 25,
+          "partial": 0,
+          "useful_predictions": 25,
+          "gold_chars": 189,
+          "predicted_chars": 189
+        },
+        "name_suffix": {
+          "gold": 18,
+          "predicted": 18,
+          "covered": 18,
+          "partial": 0,
+          "useful_predictions": 18,
+          "gold_chars": 41,
+          "predicted_chars": 41
+        },
+        "birth_date": {
+          "gold": 38,
+          "predicted": 38,
+          "covered": 38,
+          "partial": 0,
+          "useful_predictions": 38,
+          "gold_chars": 310,
+          "predicted_chars": 310
+        },
+        "street_address": {
+          "gold": 68,
+          "predicted": 68,
+          "covered": 68,
+          "partial": 0,
+          "useful_predictions": 68,
+          "gold_chars": 1363,
+          "predicted_chars": 1428
+        },
+        "address_other": {
+          "gold": 40,
+          "predicted": 36,
+          "covered": 40,
+          "partial": 0,
+          "useful_predictions": 36,
+          "gold_chars": 276,
+          "predicted_chars": 248
+        },
+        "city": {
+          "gold": 64,
+          "predicted": 62,
+          "covered": 64,
+          "partial": 0,
+          "useful_predictions": 62,
+          "gold_chars": 637,
+          "predicted_chars": 635
+        },
+        "state": {
+          "gold": 85,
+          "predicted": 82,
+          "covered": 85,
+          "partial": 0,
+          "useful_predictions": 82,
+          "gold_chars": 170,
+          "predicted_chars": 164
+        },
+        "postal_code": {
+          "gold": 60,
+          "predicted": 57,
+          "covered": 60,
+          "partial": 0,
+          "useful_predictions": 57,
+          "gold_chars": 300,
+          "predicted_chars": 285
+        },
+        "county": {
+          "gold": 25,
+          "predicted": 25,
+          "covered": 25,
+          "partial": 0,
+          "useful_predictions": 25,
+          "gold_chars": 412,
+          "predicted_chars": 412
+        },
+        "phone": {
+          "gold": 139,
+          "predicted": 139,
+          "covered": 139,
+          "partial": 0,
+          "useful_predictions": 139,
+          "gold_chars": 1653,
+          "predicted_chars": 1653
+        },
+        "email": {
+          "gold": 26,
+          "predicted": 25,
+          "covered": 25,
+          "partial": 0,
+          "useful_predictions": 25,
+          "gold_chars": 939,
+          "predicted_chars": 903
+        },
+        "account_number": {
+          "gold": 56,
+          "predicted": 56,
+          "covered": 56,
+          "partial": 0,
+          "useful_predictions": 56,
+          "gold_chars": 616,
+          "predicted_chars": 616
+        },
+        "license_number": {
+          "gold": 28,
+          "predicted": 28,
+          "covered": 28,
+          "partial": 0,
+          "useful_predictions": 28,
+          "gold_chars": 252,
+          "predicted_chars": 252
+        },
+        "organization": {
+          "gold": 34,
+          "predicted": 34,
+          "covered": 34,
+          "partial": 0,
+          "useful_predictions": 34,
+          "gold_chars": 488,
+          "predicted_chars": 488
+        },
+        "name_freeform": {
+          "gold": 23,
+          "predicted": 26,
+          "covered": 20,
+          "partial": 3,
+          "useful_predictions": 26,
+          "gold_chars": 422,
+          "predicted_chars": 419
+        }
+      },
+      "by_segment": {
+        "MSH": {
+          "gold": 25,
+          "predicted": 25,
+          "covered": 25,
+          "partial": 0,
+          "useful_predictions": 25,
+          "gold_chars": 300,
+          "predicted_chars": 300
+        },
+        "EVN": {
+          "gold": 100,
+          "predicted": 100,
+          "covered": 100,
+          "partial": 0,
+          "useful_predictions": 100,
+          "gold_chars": 1008,
+          "predicted_chars": 1008
+        },
+        "PID": {
+          "gold": 564,
+          "predicted": 564,
+          "covered": 564,
+          "partial": 0,
+          "useful_predictions": 564,
+          "gold_chars": 5828,
+          "predicted_chars": 5828
+        },
+        "NK1": {
+          "gold": 193,
+          "predicted": 193,
+          "covered": 193,
+          "partial": 0,
+          "useful_predictions": 193,
+          "gold_chars": 1740,
+          "predicted_chars": 1740
+        },
+        "PV1": {
+          "gold": 127,
+          "predicted": 127,
+          "covered": 127,
+          "partial": 0,
+          "useful_predictions": 127,
+          "gold_chars": 1320,
+          "predicted_chars": 1320
+        },
+        "OBX": {
+          "gold": 114,
+          "predicted": 88,
+          "covered": 111,
+          "partial": 0,
+          "useful_predictions": 88,
+          "gold_chars": 1146,
+          "predicted_chars": 1128
+        },
+        "NTE": {
+          "gold": 68,
+          "predicted": 56,
+          "covered": 67,
+          "partial": 0,
+          "useful_predictions": 56,
+          "gold_chars": 694,
+          "predicted_chars": 707
+        },
+        "DG1": {
+          "gold": 15,
+          "predicted": 9,
+          "covered": 12,
+          "partial": 0,
+          "useful_predictions": 9,
+          "gold_chars": 159,
+          "predicted_chars": 141
+        },
+        "AL1": {
+          "gold": 14,
+          "predicted": 11,
+          "covered": 14,
+          "partial": 0,
+          "useful_predictions": 11,
+          "gold_chars": 138,
+          "predicted_chars": 145
+        },
+        "ZIN": {
+          "gold": 20,
+          "predicted": 21,
+          "covered": 19,
+          "partial": 0,
+          "useful_predictions": 21,
+          "gold_chars": 226,
+          "predicted_chars": 225
+        },
+        "ZPD": {
+          "gold": 35,
+          "predicted": 35,
+          "covered": 35,
+          "partial": 0,
+          "useful_predictions": 35,
+          "gold_chars": 528,
+          "predicted_chars": 528
+        }
+      },
+      "spurious_by_phi_type": {
+        "birth_date": 28,
+        "organization": 5,
+        "event_date": 6,
+        "name_prefix": 2
+      },
+      "misses_by_location_class": {
+        "narrative": 7,
+        "nonstandard": 1
+      },
+      "duration_ms": 319274.83812510036,
+      "provenance": {
+        "detector": "ollama-typing-spike",
+        "model": "qwen3:14b",
+        "host": "http://mini.local:11434",
+        "use_context": true,
+        "context_style": "terse",
+        "temperature": 0.0,
+        "seed": 20261013
+      }
+    },
+    {
+      "detector": "hybrid+ollama:qwen3:14b+plain",
+      "messages": 25,
+      "untyped": {
+        "gold": 1275,
+        "predicted": 1294,
+        "covered": 1266,
+        "partial": 3,
+        "useful_predictions": 1228,
+        "gold_chars": 13087,
+        "predicted_chars": 13801
+      },
+      "typed": {
+        "gold": 1275,
+        "predicted": 1294,
+        "covered": 1139,
+        "partial": 0,
+        "useful_predictions": 1139,
+        "gold_chars": 13087,
+        "predicted_chars": 13801
+      },
+      "by_location_class": {
+        "structured": {
+          "gold": 1002,
+          "predicted": 1002,
+          "covered": 1002,
+          "partial": 0,
+          "useful_predictions": 1002,
+          "gold_chars": 10101,
+          "predicted_chars": 10101
+        },
+        "narrative": {
+          "gold": 208,
+          "predicted": 161,
+          "covered": 201,
+          "partial": 2,
+          "useful_predictions": 161,
+          "gold_chars": 2084,
+          "predicted_chars": 2068
+        },
+        "misused": {
+          "gold": 10,
+          "predicted": 10,
+          "covered": 10,
+          "partial": 0,
+          "useful_predictions": 10,
+          "gold_chars": 148,
+          "predicted_chars": 148
+        },
+        "nonstandard": {
+          "gold": 55,
+          "predicted": 55,
+          "covered": 53,
+          "partial": 1,
+          "useful_predictions": 55,
+          "gold_chars": 754,
+          "predicted_chars": 745
+        }
+      },
+      "by_phi_type": {
+        "event_date": {
+          "gold": 125,
+          "predicted": 125,
+          "covered": 125,
+          "partial": 0,
+          "useful_predictions": 125,
+          "gold_chars": 1500,
+          "predicted_chars": 1500
+        },
+        "clinician_name": {
+          "gold": 115,
+          "predicted": 108,
+          "covered": 112,
+          "partial": 0,
+          "useful_predictions": 108,
+          "gold_chars": 950,
+          "predicted_chars": 925
+        },
+        "medical_record_number": {
+          "gold": 69,
+          "predicted": 68,
+          "covered": 68,
+          "partial": 0,
+          "useful_predictions": 68,
+          "gold_chars": 575,
+          "predicted_chars": 567
+        },
+        "ssn": {
+          "gold": 54,
+          "predicted": 54,
+          "covered": 54,
+          "partial": 0,
+          "useful_predictions": 54,
+          "gold_chars": 544,
+          "predicted_chars": 544
+        },
+        "family_name": {
+          "gold": 87,
+          "predicted": 58,
+          "covered": 86,
+          "partial": 0,
+          "useful_predictions": 58,
+          "gold_chars": 735,
+          "predicted_chars": 501
+        },
+        "given_name": {
+          "gold": 96,
+          "predicted": 96,
+          "covered": 96,
+          "partial": 0,
+          "useful_predictions": 96,
+          "gold_chars": 715,
+          "predicted_chars": 982
+        },
+        "middle_name": {
+          "gold": 25,
+          "predicted": 25,
+          "covered": 25,
+          "partial": 0,
+          "useful_predictions": 25,
+          "gold_chars": 189,
+          "predicted_chars": 189
+        },
+        "name_suffix": {
+          "gold": 18,
+          "predicted": 18,
+          "covered": 18,
+          "partial": 0,
+          "useful_predictions": 18,
+          "gold_chars": 41,
+          "predicted_chars": 41
+        },
+        "birth_date": {
+          "gold": 38,
+          "predicted": 38,
+          "covered": 38,
+          "partial": 0,
+          "useful_predictions": 38,
+          "gold_chars": 310,
+          "predicted_chars": 310
+        },
+        "street_address": {
+          "gold": 68,
+          "predicted": 68,
+          "covered": 68,
+          "partial": 0,
+          "useful_predictions": 68,
+          "gold_chars": 1363,
+          "predicted_chars": 1428
+        },
+        "address_other": {
+          "gold": 40,
+          "predicted": 36,
+          "covered": 40,
+          "partial": 0,
+          "useful_predictions": 36,
+          "gold_chars": 276,
+          "predicted_chars": 248
+        },
+        "city": {
+          "gold": 64,
+          "predicted": 62,
+          "covered": 64,
+          "partial": 0,
+          "useful_predictions": 62,
+          "gold_chars": 637,
+          "predicted_chars": 635
+        },
+        "state": {
+          "gold": 85,
+          "predicted": 82,
+          "covered": 85,
+          "partial": 0,
+          "useful_predictions": 82,
+          "gold_chars": 170,
+          "predicted_chars": 164
+        },
+        "postal_code": {
+          "gold": 60,
+          "predicted": 57,
+          "covered": 60,
+          "partial": 0,
+          "useful_predictions": 57,
+          "gold_chars": 300,
+          "predicted_chars": 285
+        },
+        "county": {
+          "gold": 25,
+          "predicted": 25,
+          "covered": 25,
+          "partial": 0,
+          "useful_predictions": 25,
+          "gold_chars": 412,
+          "predicted_chars": 412
+        },
+        "phone": {
+          "gold": 139,
+          "predicted": 139,
+          "covered": 139,
+          "partial": 0,
+          "useful_predictions": 139,
+          "gold_chars": 1653,
+          "predicted_chars": 1653
+        },
+        "email": {
+          "gold": 26,
+          "predicted": 25,
+          "covered": 25,
+          "partial": 0,
+          "useful_predictions": 25,
+          "gold_chars": 939,
+          "predicted_chars": 903
+        },
+        "account_number": {
+          "gold": 56,
+          "predicted": 56,
+          "covered": 56,
+          "partial": 0,
+          "useful_predictions": 56,
+          "gold_chars": 616,
+          "predicted_chars": 616
+        },
+        "license_number": {
+          "gold": 28,
+          "predicted": 28,
+          "covered": 28,
+          "partial": 0,
+          "useful_predictions": 28,
+          "gold_chars": 252,
+          "predicted_chars": 252
+        },
+        "organization": {
+          "gold": 34,
+          "predicted": 34,
+          "covered": 34,
+          "partial": 0,
+          "useful_predictions": 34,
+          "gold_chars": 488,
+          "predicted_chars": 488
+        },
+        "name_freeform": {
+          "gold": 23,
+          "predicted": 26,
+          "covered": 20,
+          "partial": 3,
+          "useful_predictions": 26,
+          "gold_chars": 422,
+          "predicted_chars": 419
+        }
+      },
+      "by_segment": {
+        "MSH": {
+          "gold": 25,
+          "predicted": 25,
+          "covered": 25,
+          "partial": 0,
+          "useful_predictions": 25,
+          "gold_chars": 300,
+          "predicted_chars": 300
+        },
+        "EVN": {
+          "gold": 100,
+          "predicted": 100,
+          "covered": 100,
+          "partial": 0,
+          "useful_predictions": 100,
+          "gold_chars": 1008,
+          "predicted_chars": 1008
+        },
+        "PID": {
+          "gold": 564,
+          "predicted": 564,
+          "covered": 564,
+          "partial": 0,
+          "useful_predictions": 564,
+          "gold_chars": 5828,
+          "predicted_chars": 5828
+        },
+        "NK1": {
+          "gold": 193,
+          "predicted": 193,
+          "covered": 193,
+          "partial": 0,
+          "useful_predictions": 193,
+          "gold_chars": 1740,
+          "predicted_chars": 1740
+        },
+        "PV1": {
+          "gold": 127,
+          "predicted": 127,
+          "covered": 127,
+          "partial": 0,
+          "useful_predictions": 127,
+          "gold_chars": 1320,
+          "predicted_chars": 1320
+        },
+        "OBX": {
+          "gold": 114,
+          "predicted": 88,
+          "covered": 111,
+          "partial": 0,
+          "useful_predictions": 88,
+          "gold_chars": 1146,
+          "predicted_chars": 1128
+        },
+        "NTE": {
+          "gold": 68,
+          "predicted": 56,
+          "covered": 67,
+          "partial": 0,
+          "useful_predictions": 56,
+          "gold_chars": 694,
+          "predicted_chars": 707
+        },
+        "DG1": {
+          "gold": 15,
+          "predicted": 9,
+          "covered": 12,
+          "partial": 0,
+          "useful_predictions": 9,
+          "gold_chars": 159,
+          "predicted_chars": 141
+        },
+        "AL1": {
+          "gold": 14,
+          "predicted": 11,
+          "covered": 14,
+          "partial": 0,
+          "useful_predictions": 11,
+          "gold_chars": 138,
+          "predicted_chars": 145
+        },
+        "ZIN": {
+          "gold": 20,
+          "predicted": 20,
+          "covered": 18,
+          "partial": 0,
+          "useful_predictions": 20,
+          "gold_chars": 226,
+          "predicted_chars": 217
+        },
+        "ZPD": {
+          "gold": 35,
+          "predicted": 35,
+          "covered": 35,
+          "partial": 0,
+          "useful_predictions": 35,
+          "gold_chars": 528,
+          "predicted_chars": 528
+        }
+      },
+      "spurious_by_phi_type": {
+        "organization": 55,
+        "event_date": 2,
+        "identifier": 1,
+        "free_text": 3,
+        "name_prefix": 2,
+        "birth_date": 3
+      },
+      "misses_by_location_class": {
+        "narrative": 7,
+        "nonstandard": 2
+      },
+      "duration_ms": 328706.9160421379,
+      "provenance": {
+        "detector": "ollama-typing-spike",
+        "model": "qwen3:14b",
+        "host": "http://mini.local:11434",
+        "use_context": true,
+        "context_style": "plain",
+        "temperature": 0.0,
+        "seed": 20261013
+      }
+    },
+    {
+      "detector": "hybrid+ollama:qwen3:14b+domain",
+      "messages": 25,
+      "untyped": {
+        "gold": 1275,
+        "predicted": 1318,
+        "covered": 1265,
+        "partial": 3,
+        "useful_predictions": 1226,
+        "gold_chars": 13087,
+        "predicted_chars": 13902
+      },
+      "typed": {
+        "gold": 1275,
+        "predicted": 1318,
+        "covered": 1135,
+        "partial": 0,
+        "useful_predictions": 1135,
+        "gold_chars": 13087,
+        "predicted_chars": 13902
+      },
+      "by_location_class": {
+        "structured": {
+          "gold": 1002,
+          "predicted": 1002,
+          "covered": 1002,
+          "partial": 0,
+          "useful_predictions": 1002,
+          "gold_chars": 10101,
+          "predicted_chars": 10101
+        },
+        "narrative": {
+          "gold": 208,
+          "predicted": 160,
+          "covered": 201,
+          "partial": 2,
+          "useful_predictions": 160,
+          "gold_chars": 2084,
+          "predicted_chars": 2068
+        },
+        "misused": {
+          "gold": 10,
+          "predicted": 10,
+          "covered": 10,
+          "partial": 0,
+          "useful_predictions": 10,
+          "gold_chars": 148,
+          "predicted_chars": 148
+        },
+        "nonstandard": {
+          "gold": 55,
+          "predicted": 54,
+          "covered": 52,
+          "partial": 1,
+          "useful_predictions": 54,
+          "gold_chars": 754,
+          "predicted_chars": 737
+        }
+      },
+      "by_phi_type": {
+        "event_date": {
+          "gold": 125,
+          "predicted": 125,
+          "covered": 125,
+          "partial": 0,
+          "useful_predictions": 125,
+          "gold_chars": 1500,
+          "predicted_chars": 1500
+        },
+        "clinician_name": {
+          "gold": 115,
+          "predicted": 108,
+          "covered": 112,
+          "partial": 0,
+          "useful_predictions": 108,
+          "gold_chars": 950,
+          "predicted_chars": 925
+        },
+        "medical_record_number": {
+          "gold": 69,
+          "predicted": 67,
+          "covered": 67,
+          "partial": 0,
+          "useful_predictions": 67,
+          "gold_chars": 575,
+          "predicted_chars": 559
+        },
+        "ssn": {
+          "gold": 54,
+          "predicted": 54,
+          "covered": 54,
+          "partial": 0,
+          "useful_predictions": 54,
+          "gold_chars": 544,
+          "predicted_chars": 544
+        },
+        "family_name": {
+          "gold": 87,
+          "predicted": 57,
+          "covered": 86,
+          "partial": 0,
+          "useful_predictions": 57,
+          "gold_chars": 735,
+          "predicted_chars": 493
+        },
+        "given_name": {
+          "gold": 96,
+          "predicted": 96,
+          "covered": 96,
+          "partial": 0,
+          "useful_predictions": 96,
+          "gold_chars": 715,
+          "predicted_chars": 991
+        },
+        "middle_name": {
+          "gold": 25,
+          "predicted": 25,
+          "covered": 25,
+          "partial": 0,
+          "useful_predictions": 25,
+          "gold_chars": 189,
+          "predicted_chars": 189
+        },
+        "name_suffix": {
+          "gold": 18,
+          "predicted": 18,
+          "covered": 18,
+          "partial": 0,
+          "useful_predictions": 18,
+          "gold_chars": 41,
+          "predicted_chars": 41
+        },
+        "birth_date": {
+          "gold": 38,
+          "predicted": 38,
+          "covered": 38,
+          "partial": 0,
+          "useful_predictions": 38,
+          "gold_chars": 310,
+          "predicted_chars": 310
+        },
+        "street_address": {
+          "gold": 68,
+          "predicted": 68,
+          "covered": 68,
+          "partial": 0,
+          "useful_predictions": 68,
+          "gold_chars": 1363,
+          "predicted_chars": 1408
+        },
+        "address_other": {
+          "gold": 40,
+          "predicted": 36,
+          "covered": 40,
+          "partial": 0,
+          "useful_predictions": 36,
+          "gold_chars": 276,
+          "predicted_chars": 248
+        },
+        "city": {
+          "gold": 64,
+          "predicted": 63,
+          "covered": 64,
+          "partial": 0,
+          "useful_predictions": 63,
+          "gold_chars": 637,
+          "predicted_chars": 653
+        },
+        "state": {
+          "gold": 85,
+          "predicted": 82,
+          "covered": 85,
+          "partial": 0,
+          "useful_predictions": 82,
+          "gold_chars": 170,
+          "predicted_chars": 170
+        },
+        "postal_code": {
+          "gold": 60,
+          "predicted": 56,
+          "covered": 60,
+          "partial": 0,
+          "useful_predictions": 56,
+          "gold_chars": 300,
+          "predicted_chars": 280
+        },
+        "county": {
+          "gold": 25,
+          "predicted": 25,
+          "covered": 25,
+          "partial": 0,
+          "useful_predictions": 25,
+          "gold_chars": 412,
+          "predicted_chars": 412
+        },
+        "phone": {
+          "gold": 139,
+          "predicted": 139,
+          "covered": 139,
+          "partial": 0,
+          "useful_predictions": 139,
+          "gold_chars": 1653,
+          "predicted_chars": 1653
+        },
+        "email": {
+          "gold": 26,
+          "predicted": 25,
+          "covered": 25,
+          "partial": 0,
+          "useful_predictions": 25,
+          "gold_chars": 939,
+          "predicted_chars": 903
+        },
+        "account_number": {
+          "gold": 56,
+          "predicted": 56,
+          "covered": 56,
+          "partial": 0,
+          "useful_predictions": 56,
+          "gold_chars": 616,
+          "predicted_chars": 616
+        },
+        "license_number": {
+          "gold": 28,
+          "predicted": 28,
+          "covered": 28,
+          "partial": 0,
+          "useful_predictions": 28,
+          "gold_chars": 252,
+          "predicted_chars": 252
+        },
+        "organization": {
+          "gold": 34,
+          "predicted": 34,
+          "covered": 34,
+          "partial": 0,
+          "useful_predictions": 34,
+          "gold_chars": 488,
+          "predicted_chars": 488
+        },
+        "name_freeform": {
+          "gold": 23,
+          "predicted": 26,
+          "covered": 20,
+          "partial": 3,
+          "useful_predictions": 26,
+          "gold_chars": 422,
+          "predicted_chars": 419
+        }
+      },
+      "by_segment": {
+        "MSH": {
+          "gold": 25,
+          "predicted": 25,
+          "covered": 25,
+          "partial": 0,
+          "useful_predictions": 25,
+          "gold_chars": 300,
+          "predicted_chars": 300
+        },
+        "EVN": {
+          "gold": 100,
+          "predicted": 100,
+          "covered": 100,
+          "partial": 0,
+          "useful_predictions": 100,
+          "gold_chars": 1008,
+          "predicted_chars": 1008
+        },
+        "PID": {
+          "gold": 564,
+          "predicted": 564,
+          "covered": 564,
+          "partial": 0,
+          "useful_predictions": 564,
+          "gold_chars": 5828,
+          "predicted_chars": 5828
+        },
+        "NK1": {
+          "gold": 193,
+          "predicted": 193,
+          "covered": 193,
+          "partial": 0,
+          "useful_predictions": 193,
+          "gold_chars": 1740,
+          "predicted_chars": 1740
+        },
+        "PV1": {
+          "gold": 127,
+          "predicted": 127,
+          "covered": 127,
+          "partial": 0,
+          "useful_predictions": 127,
+          "gold_chars": 1320,
+          "predicted_chars": 1320
+        },
+        "OBX": {
+          "gold": 114,
+          "predicted": 87,
+          "covered": 111,
+          "partial": 0,
+          "useful_predictions": 87,
+          "gold_chars": 1146,
+          "predicted_chars": 1129
+        },
+        "NTE": {
+          "gold": 68,
+          "predicted": 56,
+          "covered": 67,
+          "partial": 0,
+          "useful_predictions": 56,
+          "gold_chars": 694,
+          "predicted_chars": 706
+        },
+        "DG1": {
+          "gold": 15,
+          "predicted": 9,
+          "covered": 12,
+          "partial": 0,
+          "useful_predictions": 9,
+          "gold_chars": 159,
+          "predicted_chars": 141
+        },
+        "AL1": {
+          "gold": 14,
+          "predicted": 11,
+          "covered": 14,
+          "partial": 0,
+          "useful_predictions": 11,
+          "gold_chars": 138,
+          "predicted_chars": 145
+        },
+        "ZIN": {
+          "gold": 20,
+          "predicted": 19,
+          "covered": 17,
+          "partial": 0,
+          "useful_predictions": 19,
+          "gold_chars": 226,
+          "predicted_chars": 209
+        },
+        "ZPD": {
+          "gold": 35,
+          "predicted": 35,
+          "covered": 35,
+          "partial": 0,
+          "useful_predictions": 35,
+          "gold_chars": 528,
+          "predicted_chars": 528
+        }
+      },
+      "spurious_by_phi_type": {
+        "organization": 55,
+        "birth_date": 28,
+        "event_date": 2,
+        "identifier": 2,
+        "free_text": 3,
+        "name_prefix": 2
+      },
+      "misses_by_location_class": {
+        "narrative": 7,
+        "nonstandard": 3
+      },
+      "duration_ms": 378705.3751659114,
+      "provenance": {
+        "detector": "ollama-typing-spike",
+        "model": "qwen3:14b",
+        "host": "http://mini.local:11434",
+        "use_context": true,
+        "context_style": "domain",
+        "temperature": 0.0,
+        "seed": 20261013
+      }
+    }
+  ]
+}
