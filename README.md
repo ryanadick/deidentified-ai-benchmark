@@ -359,6 +359,7 @@ mints them together and the concept DOI is the *lower* number:
 |---|---|
 | `10.5281/zenodo.23623785` | **concept DOI** — the project; resolves to the latest version |
 | `10.5281/zenodo.23623786` | **version DOI** — frozen to v0.1.0 forever |
+| `10.5281/zenodo.24224414` | **version DOI** — frozen to v0.2.0; one figure in it is corrected by [`ERRATA.md`](ERRATA.md) |
 
 So quote the concept DOI when you mean the benchmark, and the version DOI of the
 release you actually ran when you are reporting a number — that keeps the figure
@@ -366,6 +367,11 @@ attached to the code that produced it. Citing a version DOI as though it were th
 project pins every reader to one release, including readers who wanted the
 comparison a later release added. Machine-readable metadata, carrying both, is in
 [`CITATION.cff`](CITATION.cff).
+
+If you are quoting a figure from a release, check [`ERRATA.md`](ERRATA.md)
+first. Figures corrected after publication are released as a patch version with
+an entry there, never amended silently — a citation to an earlier version should
+still resolve to what was actually read at the time.
 
 Please quote the caveats with the numbers.
 

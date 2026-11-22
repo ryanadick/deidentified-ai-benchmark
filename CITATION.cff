@@ -10,18 +10,28 @@ authors:
     affiliation: "Active Crossing LLC"
 repository-code: "https://github.com/ryanadick/deidentified-ai-benchmark"
 license: MIT
-version: 0.1.0
+version: 0.2.1
 identifiers:
-  # Two DOIs, and the distinction matters. Zenodo mints a concept DOI for the
-  # record series and a separate version DOI for each release; the concept DOI
-  # is the lower number. Citing a version DOI as though it were the project
-  # pins every reader to one release forever.
+  # Two kinds of DOI, and the distinction matters. Zenodo mints a concept DOI
+  # for the record series and a separate version DOI for each release; the
+  # concept DOI is the lower number. Citing a version DOI as though it were
+  # the project pins every reader to one release forever.
+  #
+  # Cite the concept DOI unless you are quoting a specific figure. If you are,
+  # cite the version you read — and check ERRATA.md, which records figures
+  # corrected after release.
   - type: doi
     value: "10.5281/zenodo.23623785"
     description: "Concept DOI for the project — resolves to the latest version"
   - type: doi
     value: "10.5281/zenodo.23623786"
     description: "Version DOI for v0.1.0 — frozen to that release"
+  - type: doi
+    value: "10.5281/zenodo.24224414"
+    description: >-
+      Version DOI for v0.2.0 — frozen to that release. Its spike-results
+      summary gives the unseen Z-segment figure as 0.95, taken from the wrong
+      detector arm; the correct value is 0.900. See ERRATA.md.
 abstract: >-
   A reproducible benchmark for protected health information (PHI) detection in
   HL7 v2 messages. Existing de-identification tools and evaluations target

@@ -8,9 +8,13 @@ narrative figure a floor.
 
 | run | question | headline |
 |---|---|---|
-| `typing-spike-20261028-1045` | can a local model type unrecognised fields, and does capacity matter? | non-standard recall 0.509 → 0.96; an unseen Z-segment 0.00 → 0.95; typed recall 0.788 → 0.895. **14B beats 32B** on precision (0.986 vs 0.934) and is 2.3× faster |
+| `typing-spike-20261028-1045` | can a local model type unrecognised fields, and does capacity matter? | non-standard recall 0.509 → 0.964; an unseen Z-segment 0.000 → 0.900; typed recall 0.788 → 0.895. **14B beats 32B** on untyped precision (0.986 vs 0.934) and typed precision (0.916 vs 0.877), and is 2.3× faster |
 | `context-variants-20261030` | was the "schema context does not help" result an artifact of wording? | **No.** Four wordings at 14B: typed recall 0.890–0.895, no effect. False positives rose 18 → 92 as context grew richer |
 | `whole-message-20261109` | why scope the model to fields rather than the whole message? | Whole-message drops typed recall 0.895 → 0.456 and degrades structured fields 1.000 → 0.618 — worse than no model at all, and 2× the wall clock despite 36× fewer calls |
+
+> **Corrected in v0.2.1.** The Z-segment figure in the first row read 0.95 in
+> v0.2.0. That value is the `+ctx` arm; the figure for the arm every other
+> number in that row describes is 0.900. See [ERRATA.md](../../ERRATA.md).
 
 The second result contradicted the hypothesis the work started from. Schema
 conditioning was expected to help; it does not, and the aims were rewritten to
