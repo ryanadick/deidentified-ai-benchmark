@@ -51,6 +51,7 @@ Usage::
 from __future__ import annotations
 
 import json
+import os
 import re
 import sys
 import urllib.error
@@ -180,12 +181,17 @@ class OllamaTypingDetector:
         context_style: str = "terse",
         temperature: float = 0.0,
         seed: int = 20261013,
+        hardware: str | None = None,
     ):
         style = context_style if use_context else "none"
         if style not in self.CONTEXT_STYLES:
             raise ValueError(f"context_style must be one of {self.CONTEXT_STYLES}")
         self.model = model
         self.host = host.rstrip("/")
+        #: Free text describing the Ollama host, e.g. "Mac mini M2 Pro, 48 GB".
+        #: Falls back to $DEID_BENCH_HARDWARE so a run can set it once in the
+        #: environment rather than threading it through every constructor.
+        self.hardware = hardware or os.environ.get("DEID_BENCH_HARDWARE") or "unrecorded"
         self.context_style = style
         self.use_context = style != "none"
         self.temperature = temperature
@@ -248,11 +254,19 @@ class OllamaTypingDetector:
 
     @property
     def provenance(self) -> dict:
-        """What a reader needs to reproduce this arm."""
+        """What a reader needs to reproduce this arm.
+
+        Hardware is included because the throughput figures are otherwise
+        unreproducible: a host name says nothing about how fast the box is,
+        and s/call is the one number here that is a property of the machine
+        rather than of the model. It describes the host running Ollama, which
+        is not necessarily the machine running this script.
+        """
         return {
             "detector": "ollama-typing-spike",
             "model": self.model,
             "host": self.host,
+            "hardware": self.hardware,
             "use_context": self.use_context,
             "context_style": self.context_style,
             "temperature": self.temperature,

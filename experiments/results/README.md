@@ -24,3 +24,11 @@ context stated as the open question.
 Reproduce with `experiments/run_typing_spike.py`, `run_context_variants.py`,
 and the `WholeMessageDetector` in `ollama_typing.py`. All require a local
 Ollama host; set `--host`.
+
+**Throughput figures are hardware-bound and these runs did not record theirs.**
+Recall and precision are properties of the model and reproduce anywhere; `s/call`
+is a property of the box. The runs above were made against a 48 GB
+workstation-class host, but that was not captured in their provenance, so the
+timings cannot be checked the way every other figure can. Later runs record it —
+pass `hardware=` or set `DEID_BENCH_HARDWARE` — and anyone comparing timings
+should state their own.
